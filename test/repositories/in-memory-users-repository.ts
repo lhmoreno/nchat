@@ -4,7 +4,7 @@ import { User } from '@/domain/entities/user';
 export class InMemoryUsersRepository implements UsersRepository {
   public items: User[] = [];
 
-  async findById(userId: string) {
+  async findById(userId: string): Promise<User | null> {
     const user = this.items.find((user) => user.id === userId);
 
     if (!user) {
@@ -14,13 +14,31 @@ export class InMemoryUsersRepository implements UsersRepository {
     return user;
   }
 
-  async findManyById(userId: string) {
-    const users = this.items.filter((user) => user.id !== userId);
-
-    return users;
+  async findAll(): Promise<User[]> {
+    return this.items;
   }
 
-  async create(user: User) {
+  async findByEmail(email: string): Promise<User | null> {
+    const user = this.items.find((user) => user.email === email);
+
+    if (!user) {
+      return null;
+    }
+
+    return user;
+  }
+
+  async findByUsername(username: string): Promise<User | null> {
+    const user = this.items.find((user) => user.username === username);
+
+    if (!user) {
+      return null;
+    }
+
+    return user;
+  }
+
+  async create(user: User): Promise<void> {
     this.items.push(user);
   }
 }

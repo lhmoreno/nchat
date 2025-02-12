@@ -28,7 +28,7 @@ describe('Create Message', () => {
       content: 'Example message',
     });
 
-    expect(result.message.id).toEqual(expect.any(String));
-    expect(inMemoryMessagesRepository.items[0]).toEqual(result.message);
+    expect(result.isRight()).toBe(true);
+    expect(result.value.message).toEqual(inMemoryMessagesRepository.items[0]);
   });
 });

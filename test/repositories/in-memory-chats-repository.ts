@@ -5,11 +5,17 @@ export class InMemoryChatsRepository implements ChatsRepository {
   public items: Chat[] = [];
 
   async findByUserIds(userIds: [string, string]) {
-    return this.items.find((chat) => {
+    const chat = this.items.find((chat) => {
       return (
         chat.userIds.includes(userIds[0]) && chat.userIds.includes(userIds[1])
       );
     });
+
+    if (!chat) {
+      return null;
+    }
+
+    return chat;
   }
 
   async findById(id: string) {

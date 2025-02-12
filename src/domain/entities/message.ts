@@ -1,11 +1,13 @@
 import { randomUUID } from 'node:crypto';
-import { Optional } from '../core/types/optional';
+import { Optional } from '../../core/types/optional';
 
 export interface MessageProps {
   chatId: string;
   senderId: string;
   content: string;
-  timestamp: Date;
+  status: 'sent' | 'receive' | 'read';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export class Message {
@@ -33,13 +35,29 @@ export class Message {
     return this.props.content;
   }
 
-  get timestamp() {
-    return this.props.timestamp;
+  get status() {
+    return this.props.status;
   }
 
-  static create(props: Optional<MessageProps, 'timestamp'>, id?: string) {
+  get createdAt() {
+    return this.props.createdAt;
+  }
+
+  get updatedAt() {
+    return this.props.updatedAt;
+  }
+
+  static create(
+    props: Optional<MessageProps, 'createdAt' | 'updatedAt' | 'status'>,
+    id?: string,
+  ) {
     const message = new Message(
-      { ...props, timestamp: props.timestamp ?? new Date() },
+      {
+        ...props,
+        createdAt: props.createdAt ?? new Date(),
+        updatedAt: props.updatedAt ?? new Date(),
+        status: props.status ?? 'sent',
+      },
       id,
     );
 

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { Optional } from '../core/types/optional';
+import { Optional } from '../../core/types/optional';
 
 export interface ChatProps {
   userIds: [string, string];

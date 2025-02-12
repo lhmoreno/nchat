@@ -10,6 +10,9 @@ export function makeUser(override: Partial<UserProps> = {}, id?: string) {
   const user = User.create(
     {
       name: faker.person.fullName(),
+      email: faker.internet.email(),
+      username: faker.internet.username(),
+      passwordHash: faker.internet.password(),
       ...override,
     },
     id,

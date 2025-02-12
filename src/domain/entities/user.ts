@@ -1,9 +1,13 @@
 import { randomUUID } from 'node:crypto';
-import { Optional } from '../core/types/optional';
+import { Optional } from '../../core/types/optional';
 
 export interface UserProps {
   name: string;
+  username: string;
+  email: string;
+  passwordHash: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export class User {
@@ -23,13 +27,36 @@ export class User {
     return this.props.name;
   }
 
+  get username() {
+    return this.props.username;
+  }
+
+  get email() {
+    return this.props.email;
+  }
+
+  get passwordHash() {
+    return this.props.passwordHash;
+  }
+
   get createdAt() {
     return this.props.createdAt;
   }
 
-  static create(props: Optional<UserProps, 'createdAt'>, id?: string) {
+  get updatedAt() {
+    return this.props.updatedAt;
+  }
+
+  static create(
+    props: Optional<UserProps, 'createdAt' | 'updatedAt'>,
+    id?: string,
+  ) {
     const user = new User(
-      { ...props, createdAt: props.createdAt ?? new Date() },
+      {
+        ...props,
+        createdAt: props.createdAt ?? new Date(),
+        updatedAt: props.updatedAt ?? new Date(),
+      },
       id,
     );
 

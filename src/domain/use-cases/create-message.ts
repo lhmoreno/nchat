@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Message } from '../entities/message';
 import { MessagesRepository } from '../repositories/messages-repository';
 import { ChatsRepository } from '../repositories/chats-repository';
+import { Either, left, right } from '@/core/either';
+import { ResourceNotFoundError } from '@/core/errors/resource-not-found-error';
+import { NotAllowedError } from '@/core/errors/not-allowed-error';
 
 interface CreateMessageUseCaseRequest {
   userId: string;
@@ -9,9 +12,12 @@ interface CreateMessageUseCaseRequest {
   content: string;
 }
 
-type CreateMessageUseCaseResponse = {
-  message: Message;
-};
+type CreateMessageUseCaseResponse = Either<
+  ResourceNotFoundError | NotAllowedError,
+  {
+    message: Message;
+  }
+>;
 
 @Injectable()
 export class CreateMessageUseCase {
@@ -25,10 +31,14 @@ export class CreateMessageUseCase {
     chatId,
     content,
   }: CreateMessageUseCaseRequest): Promise<CreateMessageUseCaseResponse> {
-    const chatExists = await this.chatsRepository.findById(chatId);
+    const chat = await this.chatsRepository.findById(chatId);
 
-    if (!chatExists) {
-      throw new Error('Chat not exists');
+    if (!chat) {
+      return left(new ResourceNotFoundError());
+    }
+
+    if (!chat.userIds.includes(userId)) {
+      return left(new NotAllowedError());
     }
 
     const message = Message.create({
@@ -39,8 +49,8 @@ export class CreateMessageUseCase {
 
     await this.messagesRepository.create(message);
 
-    return {
+    return right({
       message,
-    };
+    });
   }
 }

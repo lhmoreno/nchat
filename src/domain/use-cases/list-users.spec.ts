@@ -22,6 +22,7 @@ describe('List Users', () => {
       userId: user1.id,
     });
 
-    expect(result.users).toHaveLength(2);
+    expect(result.isRight()).toBe(true);
+    expect(result.value?.users).toHaveLength(2);
   });
 });

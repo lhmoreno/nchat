@@ -32,6 +32,7 @@ describe('List Chats', () => {
       userId: user1.id,
     });
 
-    expect(result.chats).toHaveLength(2);
+    expect(result.isRight()).toBe(true);
+    expect(result.value?.chats).toHaveLength(2);
   });
 });

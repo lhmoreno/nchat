@@ -3,6 +3,7 @@ import { InMemoryMessagesRepository } from 'test/repositories/in-memory-messages
 import { makeMessage } from 'test/factories/make-message';
 import { InMemoryChatsRepository } from 'test/repositories/in-memory-chats-repository';
 import { makeChat } from 'test/factories/make-chat';
+import { NotAllowedError } from '@/core/errors/not-allowed-error';
 
 let inMemoryMessagesRepository: InMemoryMessagesRepository;
 let inMemoryChatsRepository: InMemoryChatsRepository;
@@ -25,21 +26,36 @@ describe('List Messages', () => {
 
     const message1 = makeMessage({ chatId: chat.id, senderId: 'id-1' });
     const message2 = makeMessage({ chatId: chat.id, senderId: 'id-1' });
-    const message3 = makeMessage({ chatId: chat.id, senderId: 'id-2' });
-    const message4 = makeMessage({ chatId: 'chat-2', senderId: 'id-1' });
 
-    inMemoryMessagesRepository.items.push(
-      message1,
-      message2,
-      message3,
-      message4,
-    );
+    inMemoryMessagesRepository.items.push(message1, message2);
 
     const result = await sut.execute({
       userId: 'id-1',
       chatId: chat.id,
     });
 
-    expect(result.messages).toHaveLength(3);
+    expect(result.isRight()).toBe(true);
+    expect(result.value).toEqual({
+      messages: [message1, message2],
+    });
+  });
+
+  it('should not be able to list messages from another user', async () => {
+    const chat = makeChat({ userIds: ['id-2', 'id-3'] });
+
+    inMemoryChatsRepository.items.push(chat);
+
+    const message1 = makeMessage({ chatId: chat.id, senderId: 'id-2' });
+    const message2 = makeMessage({ chatId: chat.id, senderId: 'id-3' });
+
+    inMemoryMessagesRepository.items.push(message1, message2);
+
+    const result = await sut.execute({
+      userId: 'id-1',
+      chatId: chat.id,
+    });
+
+    expect(result.isLeft()).toBe(true);
+    expect(result.value).toBeInstanceOf(NotAllowedError);
   });
 });

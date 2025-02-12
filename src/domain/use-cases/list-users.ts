@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '../entities/user';
 import { UsersRepository } from '../repositories/users-repository';
+import { Either, right } from '@/core/either';
 
 interface ListUsersUseCaseRequest {
   userId: string;
 }
 
-type ListUsersUseCaseResponse = {
-  users: User[];
-};
+type ListUsersUseCaseResponse = Either<
+  null,
+  {
+    users: User[];
+  }
+>;
 
 @Injectable()
 export class ListUsersUseCase {
@@ -17,10 +21,12 @@ export class ListUsersUseCase {
   async execute({
     userId,
   }: ListUsersUseCaseRequest): Promise<ListUsersUseCaseResponse> {
-    const users = await this.usersRepository.findManyById(userId);
+    const users = await this.usersRepository.findAll();
 
-    return {
-      users,
-    };
+    const usersWithoutMe = users.filter((user) => user.id !== userId);
+
+    return right({
+      users: usersWithoutMe,
+    });
   }
 }

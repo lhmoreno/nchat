@@ -2,6 +2,9 @@ import { makeUser } from 'test/factories/make-user';
 import { CreateChatUseCase } from './create-chat';
 import { InMemoryChatsRepository } from 'test/repositories/in-memory-chats-repository';
 import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository';
+import { makeChat } from 'test/factories/make-chat';
+import { ChatAlreadyExistsError } from './errors/chat-already-exists-error';
+import { UserNotExists } from './errors/user-not-exists';
 
 let inMemoryChatsRepository: InMemoryChatsRepository;
 let inMemoryUsersRepository: InMemoryUsersRepository;
@@ -27,8 +30,10 @@ describe('Create Chat', () => {
       userIds: [user1.id, user2.id],
     });
 
-    expect(result.chat.id).toEqual(expect.any(String));
-    expect(inMemoryChatsRepository.items[0]).toEqual(result.chat);
+    expect(result.isRight()).toBe(true);
+    expect(result.value).toEqual({
+      chat: inMemoryChatsRepository.items[0],
+    });
   });
 
   it('should not be able to create with an existing chat', async () => {
@@ -37,15 +42,18 @@ describe('Create Chat', () => {
 
     inMemoryUsersRepository.items.push(user1, user2);
 
-    await sut.execute({
+    const chat = makeChat({
       userIds: [user2.id, user1.id],
     });
 
-    await expect(
-      sut.execute({
-        userIds: [user1.id, user2.id],
-      }),
-    ).rejects.toThrow('Chat already exists');
+    inMemoryChatsRepository.items.push(chat);
+
+    const result = await sut.execute({
+      userIds: [user2.id, user1.id],
+    });
+
+    expect(result.isLeft()).toBe(true);
+    expect(result.value).toBeInstanceOf(ChatAlreadyExistsError);
   });
 
   it('should not be able to create a chat if one of the users do not exist', async () => {
@@ -53,10 +61,11 @@ describe('Create Chat', () => {
 
     inMemoryUsersRepository.items.push(user1);
 
-    await expect(
-      sut.execute({
-        userIds: [user1.id, 'invalid-id'],
-      }),
-    ).rejects.toThrow('Users not exists');
+    const result = await sut.execute({
+      userIds: [user1.id, 'invalid-id'],
+    });
+
+    expect(result.isLeft()).toBe(true);
+    expect(result.value).toBeInstanceOf(UserNotExists);
   });
 });
