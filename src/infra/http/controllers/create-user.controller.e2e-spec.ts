@@ -24,12 +24,15 @@ describe('Create User (E2E)', () => {
   test('[POST] /users', async () => {
     const response = await request(app.getHttpServer()).post('/users').send({
       name: 'John Doe',
+      username: 'john-doe',
+      email: 'johndoe@example.com',
+      password: '123456',
     });
 
     expect(response.statusCode).toBe(201);
 
     const userOnDatabase = await userModel.findOne({
-      name: 'John Doe',
+      username: 'john-doe',
     });
 
     expect(userOnDatabase).toBeTruthy();

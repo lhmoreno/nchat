@@ -12,18 +12,38 @@ export class MongooseUsersRepository implements UsersRepository {
     private userModel: Model<UserDoc>,
   ) {}
 
-  async findManyById(userId: string): Promise<User[]> {
-    const users = await this.userModel.find({
-      _id: {
-        $ne: userId,
-      },
-    });
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await this.userModel.findOne({ email });
+
+    if (!user) {
+      return null;
+    }
+
+    return MongooseUserMapper.toDomain(user);
+  }
+
+  async findByUsername(username: string): Promise<User | null> {
+    const user = await this.userModel.findOne({ username });
+
+    if (!user) {
+      return null;
+    }
+
+    return MongooseUserMapper.toDomain(user);
+  }
+
+  async findAll(): Promise<User[]> {
+    const users = await this.userModel.find();
 
     return users.map((user) => MongooseUserMapper.toDomain(user));
   }
 
   async findById(userId: string): Promise<User | null> {
     const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      return null;
+    }
 
     return MongooseUserMapper.toDomain(user);
   }

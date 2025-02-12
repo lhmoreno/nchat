@@ -12,7 +12,7 @@ export class MongooseUserMapper {
         updatedAt: raw.updatedAt,
         createdAt: raw.createdAt,
       },
-      raw._id,
+      raw._id.toString(),
     );
   }
 

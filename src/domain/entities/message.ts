@@ -5,7 +5,7 @@ export interface MessageProps {
   chatId: string;
   senderId: string;
   content: string;
-  status: 'sent' | 'receive' | 'read';
+  status: 'sent' | 'delivered' | 'read';
   createdAt: Date;
   updatedAt: Date;
 }

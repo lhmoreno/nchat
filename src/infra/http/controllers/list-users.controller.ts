@@ -1,20 +1,36 @@
 import { ListUsersUseCase } from '@/domain/use-cases/list-users';
-import { Controller, Get, HttpCode } from '@nestjs/common';
+import { CurrentUser } from '@/infra/auth/current-user-decorator';
+import { UserPayload } from '@/infra/auth/jwt.strategy';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('/users')
 export class ListUsersController {
   constructor(private listUsers: ListUsersUseCase) {}
 
   @Get()
   @HttpCode(200)
-  async handle() {
-    const { users } = await this.listUsers.execute({
-      userId: '67ab9503443b3fb34221ba52',
+  async handle(@CurrentUser() user: UserPayload) {
+    const userId = user.sub;
+
+    const result = await this.listUsers.execute({
+      userId,
     });
 
-    return users.map((user) => ({
+    if (result.isLeft()) {
+      throw new InternalServerErrorException();
+    }
+
+    return result.value.users.map((user) => ({
       id: user.id,
       name: user.name,
+      username: user.username,
     }));
   }
 }
