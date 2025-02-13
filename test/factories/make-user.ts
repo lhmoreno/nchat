@@ -31,8 +31,10 @@ export class UserFactory {
   async makeMongooseUser(data: Partial<UserProps> = {}): Promise<User> {
     const user = makeUser(data);
 
-    await this.userModel.create(MongooseUserMapper.toMongoose(user));
+    const res = await this.userModel.create(
+      MongooseUserMapper.toMongoose(user),
+    );
 
-    return user;
+    return MongooseUserMapper.toDomain(res);
   }
 }

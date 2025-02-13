@@ -21,6 +21,13 @@ export class MongooseMessagesRepository implements MessagesRepository {
   }
 
   async create(message: Message): Promise<void> {
-    await this.messageModel.create(message);
+    await this.messageModel.create({
+      chatId: message.chatId,
+      senderId: message.senderId,
+      content: message.content,
+      status: message.status,
+      updatedAt: message.updatedAt,
+      createdAt: message.createdAt,
+    });
   }
 }

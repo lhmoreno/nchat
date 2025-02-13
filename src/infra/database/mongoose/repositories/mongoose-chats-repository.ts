@@ -33,12 +33,17 @@ export class MongooseChatsRepository implements ChatsRepository {
   }
 
   async findManyByUserId(userId: string): Promise<Chat[]> {
-    const chats = await this.chatModel.find({ userId });
+    const chats = await this.chatModel.find({
+      userIds: { $elemMatch: { $eq: userId } },
+    });
 
     return chats.map((chat) => MongooseChatMapper.toDomain(chat));
   }
 
   async create(chat: Chat): Promise<void> {
-    await this.chatModel.create(chat);
+    await this.chatModel.create({
+      userIds: chat.userIds,
+      createdAt: chat.createdAt,
+    });
   }
 }

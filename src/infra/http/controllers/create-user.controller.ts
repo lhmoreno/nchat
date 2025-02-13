@@ -6,7 +6,6 @@ import {
   Controller,
   HttpCode,
   Post,
-  UsePipes,
 } from '@nestjs/common';
 import { z } from 'zod';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
@@ -21,6 +20,8 @@ const createUserBodySchema = z.object({
   password: z.string(),
 });
 
+const bodyValidationPipe = new ZodValidationPipe(createUserBodySchema);
+
 class CreateUserBodySchema extends createZodDto(createUserBodySchema) {}
 
 @Controller('/users')
@@ -30,8 +31,7 @@ export class CreateUserController {
 
   @Post()
   @HttpCode(201)
-  @UsePipes(new ZodValidationPipe(createUserBodySchema))
-  async handle(@Body() body: CreateUserBodySchema) {
+  async handle(@Body(bodyValidationPipe) body: CreateUserBodySchema) {
     const result = await this.createUser.execute(body);
 
     if (result.isLeft()) {

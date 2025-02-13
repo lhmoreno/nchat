@@ -4,7 +4,6 @@ import {
   Controller,
   Post,
   UnauthorizedException,
-  UsePipes,
 } from '@nestjs/common';
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe';
 import { z } from 'zod';
@@ -18,6 +17,8 @@ const authenticateBodySchema = z.object({
   password: z.string(),
 });
 
+const bodyValidationPipe = new ZodValidationPipe(authenticateBodySchema);
+
 class AuthenticateBodySchema extends createZodDto(authenticateBodySchema) {}
 
 @Controller('/sessions')
@@ -26,8 +27,7 @@ export class AuthenticateController {
   constructor(private authenticate: AuthenticateUseCase) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(authenticateBodySchema))
-  async handle(@Body() body: AuthenticateBodySchema) {
+  async handle(@Body(bodyValidationPipe) body: AuthenticateBodySchema) {
     const { email, password } = body;
 
     const result = await this.authenticate.execute({
