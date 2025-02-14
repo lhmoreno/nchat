@@ -3,7 +3,7 @@ import { MongooseModule } from '@/infra/database/mongoose/mongoose.module';
 import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 import { UserFactory } from 'test/factories/make-user';
 
 describe('List Users (E2E)', () => {
@@ -23,6 +23,10 @@ describe('List Users (E2E)', () => {
     jwt = moduleRef.get(JwtService);
 
     await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 
   test('[GET] /users', async () => {

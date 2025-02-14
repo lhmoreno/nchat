@@ -28,7 +28,7 @@ export class ListUsersController {
     }
 
     return result.value.users.map((user) => ({
-      id: user.id,
+      id: user.id.toString(),
       name: user.name,
       username: user.username,
     }));

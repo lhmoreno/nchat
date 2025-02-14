@@ -3,7 +3,7 @@ import { UserDoc } from '@/infra/database/mongoose/schemas/user.schema';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Model } from 'mongoose';
-import * as request from 'supertest';
+import request from 'supertest';
 
 describe('Create User (E2E)', () => {
   let app: INestApplication;
@@ -19,6 +19,10 @@ describe('Create User (E2E)', () => {
     userModel = moduleRef.get('USER_MODEL');
 
     await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 
   test('[POST] /users', async () => {

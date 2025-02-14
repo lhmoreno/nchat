@@ -23,7 +23,9 @@ export class ListUsersUseCase {
   }: ListUsersUseCaseRequest): Promise<ListUsersUseCaseResponse> {
     const users = await this.usersRepository.findAll();
 
-    const usersWithoutMe = users.filter((user) => user.id !== userId);
+    const usersWithoutMe = users.filter(
+      (user) => user.id.toString() !== userId,
+    );
 
     return right({
       users: usersWithoutMe,

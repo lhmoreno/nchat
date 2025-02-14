@@ -3,7 +3,7 @@ import { MongooseModule } from '@/infra/database/mongoose/mongoose.module';
 import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 import { ChatFactory } from 'test/factories/make-chat';
 import { UserFactory } from 'test/factories/make-user';
 
@@ -28,6 +28,10 @@ describe('List Chats (E2E)', () => {
     await app.init();
   });
 
+  afterAll(async () => {
+    await app.close();
+  });
+
   test('[GET] /chats', async () => {
     const users = await Promise.all([
       userFactory.makeMongooseUser(),
@@ -50,7 +54,7 @@ describe('List Chats (E2E)', () => {
     expect(response.body).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: chat.id,
+          id: chat.id.toString(),
         }),
       ]),
     );

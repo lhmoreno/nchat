@@ -4,6 +4,7 @@ import { makeMessage } from 'test/factories/make-message';
 import { InMemoryChatsRepository } from 'test/repositories/in-memory-chats-repository';
 import { makeChat } from 'test/factories/make-chat';
 import { NotAllowedError } from '@/core/errors/not-allowed-error';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
 let inMemoryMessagesRepository: InMemoryMessagesRepository;
 let inMemoryChatsRepository: InMemoryChatsRepository;
@@ -20,18 +21,26 @@ describe('List Messages', () => {
   });
 
   it('should be able to list messages', async () => {
-    const chat = makeChat({ userIds: ['id-1', 'id-2'] });
+    const chat = makeChat({
+      userIds: [new UniqueEntityID('id-1'), new UniqueEntityID('id-2')],
+    });
 
     inMemoryChatsRepository.items.push(chat);
 
-    const message1 = makeMessage({ chatId: chat.id, senderId: 'id-1' });
-    const message2 = makeMessage({ chatId: chat.id, senderId: 'id-1' });
+    const message1 = makeMessage({
+      chatId: chat.id,
+      senderId: new UniqueEntityID('id-1'),
+    });
+    const message2 = makeMessage({
+      chatId: chat.id,
+      senderId: new UniqueEntityID('id-1'),
+    });
 
     inMemoryMessagesRepository.items.push(message1, message2);
 
     const result = await sut.execute({
       userId: 'id-1',
-      chatId: chat.id,
+      chatId: chat.id.toString(),
     });
 
     expect(result.isRight()).toBe(true);
@@ -41,18 +50,26 @@ describe('List Messages', () => {
   });
 
   it('should not be able to list messages from another user', async () => {
-    const chat = makeChat({ userIds: ['id-2', 'id-3'] });
+    const chat = makeChat({
+      userIds: [new UniqueEntityID('id-2'), new UniqueEntityID('id-3')],
+    });
 
     inMemoryChatsRepository.items.push(chat);
 
-    const message1 = makeMessage({ chatId: chat.id, senderId: 'id-2' });
-    const message2 = makeMessage({ chatId: chat.id, senderId: 'id-3' });
+    const message1 = makeMessage({
+      chatId: chat.id,
+      senderId: new UniqueEntityID('id-2'),
+    });
+    const message2 = makeMessage({
+      chatId: chat.id,
+      senderId: new UniqueEntityID('id-3'),
+    });
 
     inMemoryMessagesRepository.items.push(message1, message2);
 
     const result = await sut.execute({
       userId: 'id-1',
-      chatId: chat.id,
+      chatId: chat.id.toString(),
     });
 
     expect(result.isLeft()).toBe(true);

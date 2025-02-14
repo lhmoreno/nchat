@@ -5,7 +5,7 @@ import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { Model } from 'mongoose';
-import * as request from 'supertest';
+import request from 'supertest';
 import { ChatFactory } from 'test/factories/make-chat';
 import { UserFactory } from 'test/factories/make-user';
 
@@ -32,6 +32,10 @@ describe('Create Message (E2E)', () => {
     await app.init();
   });
 
+  afterAll(async () => {
+    await app.close();
+  });
+
   test('[POST] /messages', async () => {
     const users = await Promise.all([
       userFactory.makeMongooseUser(),
@@ -48,14 +52,14 @@ describe('Create Message (E2E)', () => {
       .post('/messages')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
-        chatId: chat.id,
+        chatId: chat.id.toString(),
         content: 'Example message',
       });
 
     expect(response.statusCode).toBe(201);
 
     const messageOnDatabase = await messageModel.findOne({
-      chatId: chat.id,
+      chatId: chat.id.toString(),
     });
 
     expect(messageOnDatabase).toBeTruthy();

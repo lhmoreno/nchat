@@ -5,8 +5,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { UserDoc } from '@/infra/database/mongoose/schemas/user.schema';
 import { MongooseUserMapper } from '@/infra/database/mongoose/mappers/mongoose-user-mapper';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
-export function makeUser(override: Partial<UserProps> = {}, id?: string) {
+export function makeUser(
+  override: Partial<UserProps> = {},
+  id?: UniqueEntityID,
+) {
   const user = User.create(
     {
       name: faker.person.fullName(),

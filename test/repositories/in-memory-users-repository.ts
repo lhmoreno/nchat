@@ -5,7 +5,7 @@ export class InMemoryUsersRepository implements UsersRepository {
   public items: User[] = [];
 
   async findById(userId: string): Promise<User | null> {
-    const user = this.items.find((user) => user.id === userId);
+    const user = this.items.find((user) => user.id.toString() === userId);
 
     if (!user) {
       return null;
@@ -40,5 +40,11 @@ export class InMemoryUsersRepository implements UsersRepository {
 
   async create(user: User): Promise<void> {
     this.items.push(user);
+  }
+
+  async save(user: User): Promise<void> {
+    const itemIndex = this.items.findIndex((item) => item.id === user.id);
+
+    this.items[itemIndex] = user;
   }
 }

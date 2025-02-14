@@ -19,7 +19,7 @@ describe('List Users', () => {
     inMemoryUsersRepository.items.push(user1, user2, user3);
 
     const result = await sut.execute({
-      userId: user1.id,
+      userId: user1.id.toString(),
     });
 
     expect(result.isRight()).toBe(true);

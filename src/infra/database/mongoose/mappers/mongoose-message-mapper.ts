@@ -1,18 +1,19 @@
 import { Message, MessageProps } from '@/domain/entities/message';
 import { MessageDoc } from '../schemas/message.schema';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
 export class MongooseMessageMapper {
   static toDomain(raw: MessageDoc): Message {
     return Message.create(
       {
-        chatId: raw.chatId.toString(),
-        senderId: raw.senderId.toString(),
+        chatId: new UniqueEntityID(raw.chatId.toString()),
+        senderId: new UniqueEntityID(raw.senderId.toString()),
         content: raw.content,
         status: raw.status,
         updatedAt: raw.updatedAt,
         createdAt: raw.createdAt,
       },
-      raw._id.toString(),
+      new UniqueEntityID(raw._id.toString()),
     );
   }
 

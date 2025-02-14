@@ -1,15 +1,17 @@
-import { randomUUID } from 'node:crypto';
-
 import { Chat, ChatProps } from '@/domain/entities/chat';
 import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ChatDoc } from '@/infra/database/mongoose/schemas/chat.schema';
 import { MongooseChatMapper } from '@/infra/database/mongoose/mappers/mongoose-chat-mapper';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
-export function makeChat(override: Partial<ChatProps> = {}, id?: string) {
+export function makeChat(
+  override: Partial<ChatProps> = {},
+  id?: UniqueEntityID,
+) {
   const chat = Chat.create(
     {
-      userIds: [randomUUID(), randomUUID()],
+      userIds: [new UniqueEntityID(), new UniqueEntityID()],
       ...override,
     },
     id,

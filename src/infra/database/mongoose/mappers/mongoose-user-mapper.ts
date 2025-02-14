@@ -1,5 +1,6 @@
 import { User, UserProps } from '@/domain/entities/user';
 import { UserDoc } from '../schemas/user.schema';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
 export class MongooseUserMapper {
   static toDomain(raw: UserDoc): User {
@@ -12,7 +13,7 @@ export class MongooseUserMapper {
         updatedAt: raw.updatedAt,
         createdAt: raw.createdAt,
       },
-      raw._id.toString(),
+      new UniqueEntityID(raw._id.toString()),
     );
   }
 

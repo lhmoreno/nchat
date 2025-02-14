@@ -1,9 +1,10 @@
 import { AppModule } from '@/infra/app.module';
 import { MongooseModule } from '@/infra/database/mongoose/mongoose.module';
+import { EnvModule } from '@/infra/env/env.module';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { hash } from 'bcrypt';
-import * as request from 'supertest';
+import request from 'supertest';
 import { UserFactory } from 'test/factories/make-user';
 
 describe('Authenticate (E2E)', () => {
@@ -11,8 +12,9 @@ describe('Authenticate (E2E)', () => {
   let userFactory: UserFactory;
 
   beforeAll(async () => {
+    console.log(process.env.DATABASE_URL);
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, MongooseModule],
+      imports: [AppModule, EnvModule, MongooseModule],
       providers: [UserFactory],
     }).compile();
 
@@ -23,14 +25,17 @@ describe('Authenticate (E2E)', () => {
     await app.init();
   });
 
+  afterAll(async () => {
+    await app.close();
+  });
+
   test('[POST] /sessions', async () => {
-    await userFactory.makeMongooseUser({
-      email: 'johndoe@example.com',
+    const user = await userFactory.makeMongooseUser({
       passwordHash: await hash('123456', 8),
     });
 
     const response = await request(app.getHttpServer()).post('/sessions').send({
-      email: 'johndoe@example.com',
+      email: user.email,
       password: '123456',
     });
 

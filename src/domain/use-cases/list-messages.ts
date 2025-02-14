@@ -35,7 +35,7 @@ export class ListMessagesUseCase {
       return left(new ResourceNotFoundError());
     }
 
-    if (!chat.userIds.includes(userId)) {
+    if (!chat.userIds.some((id) => id.toString() === userId)) {
       return left(new NotAllowedError());
     }
 

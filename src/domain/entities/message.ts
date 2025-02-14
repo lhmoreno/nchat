@@ -1,28 +1,17 @@
-import { randomUUID } from 'node:crypto';
-import { Optional } from '../../core/types/optional';
+import { Optional } from '@/core/types/optional';
+import { Entity } from '@/core/entities/entity';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
 export interface MessageProps {
-  chatId: string;
-  senderId: string;
+  chatId: UniqueEntityID;
+  senderId: UniqueEntityID;
   content: string;
   status: 'sent' | 'delivered' | 'read';
   createdAt: Date;
   updatedAt: Date;
 }
 
-export class Message {
-  private _id: string;
-  protected props: MessageProps;
-
-  protected constructor(props: MessageProps, id?: string) {
-    this.props = props;
-    this._id = id ?? randomUUID();
-  }
-
-  get id() {
-    return this._id;
-  }
-
+export class Message extends Entity<MessageProps> {
   get chatId() {
     return this.props.chatId;
   }
@@ -39,6 +28,10 @@ export class Message {
     return this.props.status;
   }
 
+  set status(status: 'sent' | 'delivered' | 'read') {
+    this.props.status = status;
+  }
+
   get createdAt() {
     return this.props.createdAt;
   }
@@ -49,7 +42,7 @@ export class Message {
 
   static create(
     props: Optional<MessageProps, 'createdAt' | 'updatedAt' | 'status'>,
-    id?: string,
+    id?: UniqueEntityID,
   ) {
     const message = new Message(
       {

@@ -43,8 +43,8 @@ export class ListMessagesController {
     }
 
     return result.value.messages.map((message) => ({
-      id: message.id,
-      senderId: message.senderId,
+      id: message.id.toString(),
+      senderId: message.senderId.toString(),
       content: message.content,
       status: message.status,
       createdAt: message.createdAt,

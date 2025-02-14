@@ -6,15 +6,16 @@ config({ path: '.env', override: true });
 config({ path: '.env.test', override: true });
 
 const env = envSchema.parse(process.env);
+
 const databaseURL = env.DATABASE_URL;
 
-process.env.DATABASE_URL = databaseURL;
+let connection: mongoose.Connection;
 
 beforeAll(async () => {
-  await mongoose.connect(databaseURL);
+  connection = await mongoose.createConnection(databaseURL).asPromise();
 });
 
 afterAll(async () => {
-  await mongoose.connection.db?.dropDatabase();
-  await mongoose.disconnect();
+  await connection.dropDatabase();
+  await connection.close();
 });

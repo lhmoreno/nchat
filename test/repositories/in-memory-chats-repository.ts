@@ -7,7 +7,8 @@ export class InMemoryChatsRepository implements ChatsRepository {
   async findByUserIds(userIds: [string, string]) {
     const chat = this.items.find((chat) => {
       return (
-        chat.userIds.includes(userIds[0]) && chat.userIds.includes(userIds[1])
+        chat.userIds.some((id) => id.toString() === userIds[0]) &&
+        chat.userIds.some((id) => id.toString() === userIds[1])
       );
     });
 
@@ -19,7 +20,7 @@ export class InMemoryChatsRepository implements ChatsRepository {
   }
 
   async findById(id: string) {
-    const chat = this.items.find((chat) => chat.id === id);
+    const chat = this.items.find((chat) => chat.id.toString() === id);
 
     if (!chat) {
       return null;
@@ -29,7 +30,9 @@ export class InMemoryChatsRepository implements ChatsRepository {
   }
 
   async findManyByUserId(userId: string) {
-    const chats = this.items.filter((chat) => chat.userIds.includes(userId));
+    const chats = this.items.filter((chat) =>
+      chat.userIds.some((id) => id.toString() === userId),
+    );
 
     return chats;
   }

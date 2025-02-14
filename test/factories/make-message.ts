@@ -1,18 +1,21 @@
-import { randomUUID } from 'node:crypto';
-
 import { Message, MessageProps } from '@/domain/entities/message';
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { MessageDoc } from '@/infra/database/mongoose/schemas/message.schema';
 import { MongooseMessageMapper } from '@/infra/database/mongoose/mappers/mongoose-message-mapper';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
-export function makeMessage(override: Partial<MessageProps> = {}, id?: string) {
+export function makeMessage(
+  override: Partial<MessageProps> = {},
+  id?: UniqueEntityID,
+) {
   const message = Message.create(
     {
-      chatId: randomUUID(),
-      senderId: randomUUID(),
+      chatId: new UniqueEntityID(),
+      senderId: new UniqueEntityID(),
       content: faker.lorem.sentence(),
+      status: faker.helpers.arrayElement(['read', 'delivered', 'read']),
       ...override,
     },
     id,

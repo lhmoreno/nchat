@@ -1,5 +1,6 @@
-import { randomUUID } from 'node:crypto';
-import { Optional } from '../../core/types/optional';
+import { Optional } from '@/core/types/optional';
+import { Entity } from '@/core/entities/entity';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
 export interface UserProps {
   name: string;
@@ -10,25 +11,21 @@ export interface UserProps {
   updatedAt: Date;
 }
 
-export class User {
-  private _id: string;
-  protected props: UserProps;
-
-  protected constructor(props: UserProps, id?: string) {
-    this.props = props;
-    this._id = id ?? randomUUID();
-  }
-
-  get id() {
-    return this._id;
-  }
-
+export class User extends Entity<UserProps> {
   get name() {
     return this.props.name;
   }
 
+  set name(name: string) {
+    this.props.name = name;
+  }
+
   get username() {
     return this.props.username;
+  }
+
+  set username(username: string) {
+    this.props.username = username;
   }
 
   get email() {
@@ -49,7 +46,7 @@ export class User {
 
   static create(
     props: Optional<UserProps, 'createdAt' | 'updatedAt'>,
-    id?: string,
+    id?: UniqueEntityID,
   ) {
     const user = new User(
       {

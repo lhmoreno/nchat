@@ -3,7 +3,7 @@ import { MongooseModule } from '@/infra/database/mongoose/mongoose.module';
 import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 import { ChatFactory } from 'test/factories/make-chat';
 import { MessageFactory } from 'test/factories/make-message';
 import { UserFactory } from 'test/factories/make-user';
@@ -29,6 +29,10 @@ describe('List Messages (E2E)', () => {
     jwt = moduleRef.get(JwtService);
 
     await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 
   test('[GET] /messages', async () => {
@@ -58,7 +62,7 @@ describe('List Messages (E2E)', () => {
       .get('/messages')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
-        chatId: chat.id,
+        chatId: chat.id.toString(),
       });
 
     expect(response.statusCode).toBe(200);
@@ -66,10 +70,10 @@ describe('List Messages (E2E)', () => {
     expect(response.body).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: messages[0].id,
+          id: messages[0].id.toString(),
         }),
         expect.objectContaining({
-          id: messages[1].id,
+          id: messages[1].id.toString(),
         }),
       ]),
     );

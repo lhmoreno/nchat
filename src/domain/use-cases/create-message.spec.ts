@@ -2,6 +2,7 @@ import { InMemoryChatsRepository } from 'test/repositories/in-memory-chats-repos
 import { CreateMessageUseCase } from './create-message';
 import { InMemoryMessagesRepository } from 'test/repositories/in-memory-messages-repository';
 import { makeChat } from 'test/factories/make-chat';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
 let inMemoryMessagesRepository: InMemoryMessagesRepository;
 let inMemoryChatsRepository: InMemoryChatsRepository;
@@ -18,13 +19,15 @@ describe('Create Message', () => {
   });
 
   it('should be able to create a new message', async () => {
-    const chat = makeChat({ userIds: ['userId-1', 'userId-2'] });
+    const chat = makeChat({
+      userIds: [new UniqueEntityID('userId-1'), new UniqueEntityID('userId-2')],
+    });
 
     inMemoryChatsRepository.items.push(chat);
 
     const result = await sut.execute({
       userId: 'userId-1',
-      chatId: chat.id,
+      chatId: chat.id.toString(),
       content: 'Example message',
     });
 

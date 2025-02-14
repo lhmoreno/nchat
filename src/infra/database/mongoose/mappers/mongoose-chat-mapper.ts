@@ -1,14 +1,18 @@
 import { Chat, ChatProps } from '@/domain/entities/chat';
 import { ChatDoc } from '../schemas/chat.schema';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
 export class MongooseChatMapper {
   static toDomain(raw: ChatDoc): Chat {
     return Chat.create(
       {
-        userIds: [raw.userIds[0].toString(), raw.userIds[1].toString()],
+        userIds: [
+          new UniqueEntityID(raw.userIds[0].toString()),
+          new UniqueEntityID(raw.userIds[1].toString()),
+        ],
         createdAt: raw.createdAt,
       },
-      raw._id.toString(),
+      new UniqueEntityID(raw._id.toString()),
     );
   }
 

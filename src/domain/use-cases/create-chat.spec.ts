@@ -27,7 +27,7 @@ describe('Create Chat', () => {
     inMemoryUsersRepository.items.push(user1, user2);
 
     const result = await sut.execute({
-      userIds: [user1.id, user2.id],
+      userIds: [user1.id.toString(), user2.id.toString()],
     });
 
     expect(result.isRight()).toBe(true);
@@ -49,7 +49,7 @@ describe('Create Chat', () => {
     inMemoryChatsRepository.items.push(chat);
 
     const result = await sut.execute({
-      userIds: [user2.id, user1.id],
+      userIds: [user2.id.toString(), user1.id.toString()],
     });
 
     expect(result.isLeft()).toBe(true);
@@ -62,7 +62,7 @@ describe('Create Chat', () => {
     inMemoryUsersRepository.items.push(user1);
 
     const result = await sut.execute({
-      userIds: [user1.id, 'invalid-id'],
+      userIds: [user1.id.toString(), 'invalid-id'],
     });
 
     expect(result.isLeft()).toBe(true);

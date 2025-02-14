@@ -29,7 +29,7 @@ describe('List Chats', () => {
     inMemoryChatsRepository.items.push(chat1, chat2, chat3);
 
     const result = await sut.execute({
-      userId: user1.id,
+      userId: user1.id.toString(),
     });
 
     expect(result.isRight()).toBe(true);

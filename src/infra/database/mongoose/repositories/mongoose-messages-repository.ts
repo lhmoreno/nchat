@@ -20,6 +20,18 @@ export class MongooseMessagesRepository implements MessagesRepository {
     return messages.map((message) => MongooseMessageMapper.toDomain(message));
   }
 
+  async findById(id: string): Promise<Message | null> {
+    const message = await this.messageModel.findOne({
+      _id: id,
+    });
+
+    if (!message) {
+      return null;
+    }
+
+    return MongooseMessageMapper.toDomain(message);
+  }
+
   async create(message: Message): Promise<void> {
     await this.messageModel.create({
       chatId: message.chatId,
@@ -29,5 +41,16 @@ export class MongooseMessagesRepository implements MessagesRepository {
       updatedAt: message.updatedAt,
       createdAt: message.createdAt,
     });
+  }
+
+  async save(message: Message): Promise<void> {
+    const data = MongooseMessageMapper.toMongoose(message);
+
+    await this.messageModel.updateOne(
+      {
+        _id: message.id.toString(),
+      },
+      data,
+    );
   }
 }

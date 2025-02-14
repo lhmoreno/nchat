@@ -3,7 +3,8 @@ import { Module } from '@nestjs/common';
 import { UserSchema } from './schemas/user.schema';
 import { ChatSchema } from './schemas/chat.schema';
 import { MessageSchema } from './schemas/message.schema';
-import { ConfigService } from '@nestjs/config';
+import { EnvService } from '@/infra/env/env.service';
+import { EnvModule } from '@/infra/env/env.module';
 
 const UserModel = {
   provide: 'USER_MODEL',
@@ -27,15 +28,16 @@ const MessageModel = {
 };
 
 @Module({
+  imports: [EnvModule],
   providers: [
     {
       provide: 'DATABASE_CONNECTION',
-      useFactory: (configService: ConfigService): Promise<typeof mongoose> => {
-        const uri = configService.get<string>('DATABASE_URL');
+      useFactory: (envService: EnvService): Promise<mongoose.Connection> => {
+        const uri = envService.get('DATABASE_URL');
 
-        return mongoose.connect(uri ?? '');
+        return mongoose.createConnection(uri ?? '').asPromise();
       },
-      inject: [ConfigService],
+      inject: [EnvService],
     },
     UserModel,
     ChatModel,

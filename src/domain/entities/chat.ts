@@ -1,24 +1,13 @@
-import { randomUUID } from 'node:crypto';
-import { Optional } from '../../core/types/optional';
+import { Optional } from '@/core/types/optional';
+import { Entity } from '@/core/entities/entity';
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
 export interface ChatProps {
-  userIds: [string, string];
+  userIds: [UniqueEntityID, UniqueEntityID];
   createdAt: Date;
 }
 
-export class Chat {
-  private _id: string;
-  protected props: ChatProps;
-
-  protected constructor(props: ChatProps, id?: string) {
-    this.props = props;
-    this._id = id ?? randomUUID();
-  }
-
-  get id() {
-    return this._id;
-  }
-
+export class Chat extends Entity<ChatProps> {
   get userIds() {
     return this.props.userIds;
   }
@@ -27,7 +16,7 @@ export class Chat {
     return this.props.createdAt;
   }
 
-  static create(props: Optional<ChatProps, 'createdAt'>, id?: string) {
+  static create(props: Optional<ChatProps, 'createdAt'>, id?: UniqueEntityID) {
     const chat = new Chat(
       { ...props, createdAt: props.createdAt ?? new Date() },
       id,

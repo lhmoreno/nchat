@@ -28,8 +28,10 @@ export class ListChatsController {
     }
 
     return result.value.chats.map((chat) => ({
-      id: chat.id,
-      userId: chat.userIds.filter((id) => id !== userId)[0],
+      id: chat.id.toString(),
+      userId: chat.userIds
+        .filter((id) => id.toString() !== userId)[0]
+        .toString(),
     }));
   }
 }

@@ -53,4 +53,15 @@ export class MongooseUsersRepository implements UsersRepository {
 
     await this.userModel.create(data);
   }
+
+  async save(user: User): Promise<void> {
+    const data = MongooseUserMapper.toMongoose(user);
+
+    await this.userModel.updateOne(
+      {
+        _id: user.id.toString(),
+      },
+      data,
+    );
+  }
 }
