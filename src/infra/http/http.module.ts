@@ -15,6 +15,12 @@ import { CreateMessageController } from './controllers/create-message.controller
 import { CreateChatController } from './controllers/create-chat.controller';
 import { ListChatsController } from './controllers/list-chats.controller';
 import { ListMessagesController } from './controllers/list-messages.controller';
+import { UpdateMessageStatusUseCase } from '@/domain/use-cases/update-message-status';
+import { UpdateUserUseCase } from '@/domain/use-cases/update-user';
+import { UpdateUsernameUseCase } from '@/domain/use-cases/update-username';
+import { UpdateMessageStatusController } from './controllers/update-message-status.controller';
+import { UpdateUserController } from './controllers/update-user.controller';
+import { UpdateUsernameController } from './controllers/update-username.controller';
 
 @Module({
   imports: [DatabaseModule, CryptographyModule],
@@ -26,6 +32,9 @@ import { ListMessagesController } from './controllers/list-messages.controller';
     ListUsersController,
     ListChatsController,
     ListMessagesController,
+    UpdateMessageStatusController,
+    UpdateUserController,
+    UpdateUsernameController,
   ],
   providers: [
     AuthenticateUseCase,
@@ -35,6 +44,9 @@ import { ListMessagesController } from './controllers/list-messages.controller';
     CreateMessageUseCase,
     ListChatsUseCase,
     ListMessagesUseCase,
+    UpdateMessageStatusUseCase,
+    UpdateUserUseCase,
+    UpdateUsernameUseCase,
   ],
 })
 export class HttpModule {}
