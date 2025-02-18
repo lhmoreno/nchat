@@ -4,6 +4,7 @@ import { EnvModule } from './env/env.module';
 import { ConfigModule } from '@nestjs/config';
 import { envSchema } from './env/env';
 import { AuthModule } from './auth/auth.module';
+import { EventsModule } from './socket/events/events.module';
 
 @Module({
   imports: [

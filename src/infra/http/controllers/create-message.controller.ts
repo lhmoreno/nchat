@@ -16,6 +16,7 @@ import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { NotAllowedError } from '@/core/errors/not-allowed-error';
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found-error';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { EventsGateway } from '@/infra/socket/events/events.gateway';
 
 const createMessageBodySchema = z.object({
   chatId: z.string(),
@@ -29,7 +30,10 @@ class CreateMessageBodySchema extends createZodDto(createMessageBodySchema) {}
 @ApiBearerAuth()
 @Controller('/messages')
 export class CreateMessageController {
-  constructor(private createMessage: CreateMessageUseCase) {}
+  constructor(
+    private createMessage: CreateMessageUseCase,
+    private eventsGateway: EventsGateway,
+  ) {}
 
   @Post()
   @HttpCode(201)
@@ -57,5 +61,23 @@ export class CreateMessageController {
           throw new BadRequestException(error.message);
       }
     }
+
+    this.eventsGateway.emitMessage(
+      {
+        id: result.value.message.id.toString(),
+        content: result.value.message.content,
+        createdAt: result.value.message.createdAt,
+        chatId: result.value.message.chatId.toString(),
+      },
+      result.value.receiveId,
+    );
+
+    return {
+      id: result.value.message.id.toString(),
+      content: result.value.message.content,
+      createdAt: result.value.message.createdAt,
+      chatId: result.value.message.chatId.toString(),
+      status: result.value.message.status,
+    };
   }
 }

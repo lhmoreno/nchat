@@ -17,6 +17,7 @@ import { NotAllowedError } from '@/core/errors/not-allowed-error';
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found-error';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateMessageStatusUseCase } from '@/domain/use-cases/update-message-status';
+import { EventsGateway } from '@/infra/socket/events/events.gateway';
 
 const updateMessageStatusBodySchema = z.object({
   status: z.enum(['delivered', 'read']),
@@ -31,7 +32,10 @@ class UpdateMessageStatusBodySchema extends createZodDto(
 @ApiBearerAuth()
 @Controller('/messages/:id/status')
 export class UpdateMessageStatusController {
-  constructor(private updateMessageStatus: UpdateMessageStatusUseCase) {}
+  constructor(
+    private updateMessageStatus: UpdateMessageStatusUseCase,
+    private eventsGateway: EventsGateway,
+  ) {}
 
   @Patch()
   @HttpCode(204)
@@ -60,5 +64,14 @@ export class UpdateMessageStatusController {
           throw new BadRequestException(error.message);
       }
     }
+
+    this.eventsGateway.emitMessageStatus(
+      {
+        id: result.value.message.id.toString(),
+        status: result.value.message.status as 'delivered' | 'read',
+        chatId: result.value.message.chatId.toString(),
+      },
+      result.value.senderId,
+    );
   }
 }

@@ -21,9 +21,10 @@ import { UpdateUsernameUseCase } from '@/domain/use-cases/update-username';
 import { UpdateMessageStatusController } from './controllers/update-message-status.controller';
 import { UpdateUserController } from './controllers/update-user.controller';
 import { UpdateUsernameController } from './controllers/update-username.controller';
+import { EventsModule } from '../socket/events/events.module';
 
 @Module({
-  imports: [DatabaseModule, CryptographyModule],
+  imports: [DatabaseModule, CryptographyModule, EventsModule],
   controllers: [
     AuthenticateController,
     CreateUserController,

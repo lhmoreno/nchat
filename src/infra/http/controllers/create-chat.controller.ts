@@ -15,7 +15,7 @@ import { UserPayload } from '@/infra/auth/jwt.strategy';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { ChatAlreadyExistsError } from '@/domain/use-cases/errors/chat-already-exists-error';
-import { UserAlreadyExistsError } from '@/domain/use-cases/errors/user-already-exists-error';
+import { UserNotExists } from '@/domain/use-cases/errors/user-not-exists';
 
 const createChatBodySchema = z.object({
   receiveId: z.string(),
@@ -48,7 +48,7 @@ export class CreateChatController {
       switch (error.constructor) {
         case ChatAlreadyExistsError:
           throw new ConflictException(error.message);
-        case UserAlreadyExistsError:
+        case UserNotExists:
           throw new NotFoundException(error.message);
         default:
           throw new BadRequestException(error.message);

@@ -17,6 +17,7 @@ type CreateMessageUseCaseResponse = Either<
   ResourceNotFoundError | NotAllowedError,
   {
     message: Message;
+    receiveId: string;
   }
 >;
 
@@ -52,6 +53,8 @@ export class CreateMessageUseCase {
 
     return right({
       message,
+      receiveId:
+        chat.userIds.find((id) => id.toString() !== userId)?.toString() ?? '',
     });
   }
 }

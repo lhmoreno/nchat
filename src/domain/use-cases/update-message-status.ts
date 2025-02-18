@@ -16,6 +16,7 @@ type UpdateMessageStatusUseCaseResponse = Either<
   ResourceNotFoundError | NotAllowedError,
   {
     message: Message;
+    senderId: string;
   }
 >;
 
@@ -61,6 +62,7 @@ export class UpdateMessageStatusUseCase {
 
     return right({
       message,
+      senderId: message.senderId.toString(),
     });
   }
 }
