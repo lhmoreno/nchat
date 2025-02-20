@@ -30,7 +30,7 @@ export class CreateUserController {
   constructor(private createUser: CreateUserUseCase) {}
 
   @Post()
-  @HttpCode(201)
+  @HttpCode(204)
   async handle(@Body(bodyValidationPipe) body: CreateUserBodySchema) {
     const result = await this.createUser.execute(body);
 

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  HttpCode,
   Post,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -27,6 +28,7 @@ export class AuthenticateController {
   constructor(private authenticate: AuthenticateUseCase) {}
 
   @Post()
+  @HttpCode(201)
   async handle(@Body(bodyValidationPipe) body: AuthenticateBodySchema) {
     const { email, password } = body;
 
