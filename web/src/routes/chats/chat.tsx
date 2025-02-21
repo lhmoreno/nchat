@@ -7,6 +7,14 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import dayjs from "dayjs";
 import { fakerPT_BR as faker } from "@faker-js/faker";
 
+export function meta({ params }: Route.MetaArgs) {
+  if (params.chatId) {
+    return [{ title: `Conversa: ${params.chatId} | nChat` }];
+  }
+
+  return [{ title: "Conversas | nChat" }];
+}
+
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   const { chatId } = params;
 

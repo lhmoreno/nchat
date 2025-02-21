@@ -11,6 +11,9 @@ export default [
       index("./routes/app/home.tsx"),
       route("chats/:chatId?", "./routes/chats/chat.tsx"),
     ]),
+    layout("./routes/profile/layout.tsx", [
+      route("profile", "./routes/profile/profile.tsx"),
+    ]),
   ]),
 
   layout("./routes/auth/layout.tsx", [

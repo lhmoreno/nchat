@@ -22,6 +22,8 @@ import { UpdateMessageStatusController } from './controllers/update-message-stat
 import { UpdateUserController } from './controllers/update-user.controller';
 import { UpdateUsernameController } from './controllers/update-username.controller';
 import { EventsModule } from '../socket/events/events.module';
+import { GetUserController } from './controllers/get-user.controller';
+import { GetUserUseCase } from '@/domain/use-cases/get-user';
 
 @Module({
   imports: [DatabaseModule, CryptographyModule, EventsModule],
@@ -36,6 +38,7 @@ import { EventsModule } from '../socket/events/events.module';
     UpdateMessageStatusController,
     UpdateUserController,
     UpdateUsernameController,
+    GetUserController,
   ],
   providers: [
     AuthenticateUseCase,
@@ -48,6 +51,7 @@ import { EventsModule } from '../socket/events/events.module';
     UpdateMessageStatusUseCase,
     UpdateUserUseCase,
     UpdateUsernameUseCase,
+    GetUserUseCase,
   ],
 })
 export class HttpModule {}

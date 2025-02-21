@@ -1,4 +1,4 @@
-import { LogOutIcon, SettingsIcon, UserRoundIcon } from "lucide-react";
+import { LogOutIcon, UserRoundIcon } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Profile } from "~/lib/api";
 import { cn, logOut } from "~/lib/utils";
 
 const links = [
@@ -18,7 +19,7 @@ const links = [
   { href: "/profile", title: "Perfil" },
 ];
 
-export function Header() {
+export function Header({ profile }: { profile: Profile }) {
   const { pathname } = useLocation();
 
   return (
@@ -54,12 +55,12 @@ export function Header() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  {/* <p className="text-sm font-medium leading-none">
-                    {user?.displayName ?? "Sem nome"}
+                  <p className="text-sm font-medium leading-none">
+                    {profile.name}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p> */}
+                    {`@${profile.username}`}
+                  </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
