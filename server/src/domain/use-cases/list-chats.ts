@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Chat } from '../entities/chat';
-import { ChatsRepository } from '../repositories/chats-repository';
+import {
+  ChatsRepository,
+  ChatWithUser,
+} from '../repositories/chats-repository';
 import { Either, right } from '@/core/either';
 
 interface ListChatsUseCaseRequest {
@@ -10,7 +12,7 @@ interface ListChatsUseCaseRequest {
 type ListChatsUseCaseResponse = Either<
   null,
   {
-    chats: Chat[];
+    chats: ChatWithUser[];
   }
 >;
 

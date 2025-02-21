@@ -1,9 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ChatsRepository } from '@/domain/repositories/chats-repository';
+import {
+  ChatsRepository,
+  ChatWithUser,
+} from '@/domain/repositories/chats-repository';
 import { Chat } from '@/domain/entities/chat';
 import { MongooseChatMapper } from '../mappers/mongoose-chat-mapper';
 import { Model } from 'mongoose';
 import { ChatDoc } from '../schemas/chat.schema';
+import { UserDoc } from '../schemas/user.schema';
 
 @Injectable()
 export class MongooseChatsRepository implements ChatsRepository {
@@ -32,12 +36,14 @@ export class MongooseChatsRepository implements ChatsRepository {
     return MongooseChatMapper.toDomain(chat);
   }
 
-  async findManyByUserId(userId: string): Promise<Chat[]> {
-    const chats = await this.chatModel.find({
-      userIds: { $elemMatch: { $eq: userId } },
-    });
+  async findManyByUserId(userId: string): Promise<ChatWithUser[]> {
+    const chats = await this.chatModel
+      .find({
+        userIds: { $elemMatch: { $eq: userId } },
+      })
+      .populate<{ userIds: [UserDoc, UserDoc] }>('userIds');
 
-    return chats.map((chat) => MongooseChatMapper.toDomain(chat));
+    return chats.map((chat) => MongooseChatMapper.toDomainWithUsers(chat));
   }
 
   async create(chat: Chat): Promise<void> {

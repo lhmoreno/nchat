@@ -107,4 +107,10 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  .h-chat {
+    height: calc(100vh - 6rem);
+  }
+  .h-conversation {
+    height: calc(100vh - 7rem);
+  }
 }

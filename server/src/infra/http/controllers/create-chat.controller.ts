@@ -54,5 +54,7 @@ export class CreateChatController {
           throw new BadRequestException(error.message);
       }
     }
+
+    return { id: result.value.chat.id };
   }
 }

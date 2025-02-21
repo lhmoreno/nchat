@@ -27,11 +27,19 @@ export class ListChatsController {
       throw new InternalServerErrorException();
     }
 
-    return result.value.chats.map((chat) => ({
-      id: chat.id.toString(),
-      userId: chat.userIds
-        .filter((id) => id.toString() !== userId)[0]
-        .toString(),
-    }));
+    return result.value.chats.map((chat) => {
+      const user = chat.users.filter(
+        (user) => user.id.toString() !== userId,
+      )[0];
+
+      return {
+        id: chat.id.toString(),
+        user: {
+          id: user.id.toString(),
+          name: user.name,
+          username: user.username,
+        },
+      };
+    });
   }
 }
