@@ -47,14 +47,12 @@ export class CreateUserUseCase {
 
     const hashedPassword = await this.hashGenerator.hash(password);
 
-    const user = User.create({
+    const user = await this.usersRepository.create({
       name,
-      email,
       username,
+      email,
       passwordHash: hashedPassword,
     });
-
-    await this.usersRepository.create(user);
 
     return right({
       user,

@@ -16,8 +16,8 @@ export const MessageSchema = new Schema<MessageDoc>(
     content: { type: String, required: true },
     status: {
       type: String,
-      required: true,
       enum: ['sent', 'delivered', 'read'],
+      default: 'sent',
     },
   },
   { timestamps: true },

@@ -5,7 +5,6 @@ import { UsersRepository } from '../repositories/users-repository';
 import { Either, left, right } from '@/core/either';
 import { ChatAlreadyExistsError } from './errors/chat-already-exists-error';
 import { UserNotExists } from './errors/user-not-exists';
-import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
 interface CreateChatUseCaseRequest {
   userIds: [string, string];
@@ -47,11 +46,7 @@ export class CreateChatUseCase {
       return left(new UserNotExists(userIds[1]));
     }
 
-    const chat = Chat.create({
-      userIds: [new UniqueEntityID(userIds[0]), new UniqueEntityID(userIds[1])],
-    });
-
-    await this.chatsRepository.create(chat);
+    const chat = await this.chatsRepository.create({ userIds });
 
     return right({
       chat,

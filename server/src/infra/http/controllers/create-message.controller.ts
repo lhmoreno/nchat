@@ -68,6 +68,7 @@ export class CreateMessageController {
         content: result.value.message.content,
         createdAt: result.value.message.createdAt,
         chatId: result.value.message.chatId.toString(),
+        senderId: userId,
       },
       result.value.receiveId,
     );

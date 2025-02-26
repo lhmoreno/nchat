@@ -68,7 +68,13 @@ export class EventsGateway
   }
 
   emitMessage(
-    message: { id: string; content: string; createdAt: Date; chatId: string },
+    message: {
+      id: string;
+      content: string;
+      createdAt: Date;
+      chatId: string;
+      senderId: string;
+    },
     userId: string,
   ) {
     const clientId = this.users[userId];
@@ -77,7 +83,13 @@ export class EventsGateway
       return false;
     }
 
-    const success = this.server.to(clientId).emit('message', message);
+    const success = this.server.to(clientId).emit('message', {
+      id: message.id,
+      content: message.content,
+      createdAt: message.createdAt.toISOString(),
+      chatId: message.chatId,
+      senderId: message.senderId,
+    });
 
     return success;
   }

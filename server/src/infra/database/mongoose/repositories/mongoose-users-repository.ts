@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UsersRepository } from '@/domain/repositories/users-repository';
-import { User } from '@/domain/entities/user';
+import { User, UserInput } from '@/domain/entities/user';
 import { MongooseUserMapper } from '../mappers/mongoose-user-mapper';
 import { Model } from 'mongoose';
 import { UserDoc } from '../schemas/user.schema';
@@ -48,10 +48,12 @@ export class MongooseUsersRepository implements UsersRepository {
     return MongooseUserMapper.toDomain(user);
   }
 
-  async create(user: User): Promise<void> {
-    const data = MongooseUserMapper.toMongoose(user);
+  async create(input: UserInput): Promise<User> {
+    const doc = await this.userModel.create(input);
 
-    await this.userModel.create(data);
+    const user = User.create(input, doc._id.toString());
+
+    return user;
   }
 
   async save(user: User): Promise<void> {

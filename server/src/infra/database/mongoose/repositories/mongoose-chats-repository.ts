@@ -3,7 +3,7 @@ import {
   ChatsRepository,
   ChatWithUser,
 } from '@/domain/repositories/chats-repository';
-import { Chat } from '@/domain/entities/chat';
+import { Chat, ChatInput } from '@/domain/entities/chat';
 import { MongooseChatMapper } from '../mappers/mongoose-chat-mapper';
 import { Model } from 'mongoose';
 import { ChatDoc } from '../schemas/chat.schema';
@@ -46,10 +46,11 @@ export class MongooseChatsRepository implements ChatsRepository {
     return chats.map((chat) => MongooseChatMapper.toDomainWithUsers(chat));
   }
 
-  async create(chat: Chat): Promise<void> {
-    await this.chatModel.create({
-      userIds: chat.userIds,
-      createdAt: chat.createdAt,
-    });
+  async create(input: ChatInput): Promise<Chat> {
+    const doc = await this.chatModel.create(input);
+
+    const chat = Chat.create(input, doc._id.toString());
+
+    return chat;
   }
 }

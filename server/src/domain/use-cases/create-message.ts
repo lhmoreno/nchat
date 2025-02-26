@@ -5,7 +5,6 @@ import { ChatsRepository } from '../repositories/chats-repository';
 import { Either, left, right } from '@/core/either';
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found-error';
 import { NotAllowedError } from '@/core/errors/not-allowed-error';
-import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
 interface CreateMessageUseCaseRequest {
   userId: string;
@@ -43,13 +42,11 @@ export class CreateMessageUseCase {
       return left(new NotAllowedError());
     }
 
-    const message = Message.create({
-      senderId: new UniqueEntityID(userId),
-      chatId: new UniqueEntityID(chatId),
+    const message = await this.messagesRepository.create({
+      senderId: userId,
+      chatId,
       content,
     });
-
-    await this.messagesRepository.create(message);
 
     return right({
       message,

@@ -13,7 +13,8 @@ export async function clientLoader() {
 
   if (!res.profile) {
     console.error(res.error);
-    return {};
+    localStorage.removeItem("token");
+    return redirect("/login");
   }
 
   return res.profile;

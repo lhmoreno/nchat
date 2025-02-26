@@ -1,9 +1,10 @@
 import { Optional } from '@/core/types/optional';
 import { Entity } from '@/core/entities/entity';
-import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
-export interface ChatProps {
-  userIds: [UniqueEntityID, UniqueEntityID];
+export type ChatInput = Optional<ChatProps, 'createdAt'>;
+
+interface ChatProps {
+  userIds: [string, string];
   createdAt: Date;
 }
 
@@ -16,9 +17,9 @@ export class Chat extends Entity<ChatProps> {
     return this.props.createdAt;
   }
 
-  static create(props: Optional<ChatProps, 'createdAt'>, id?: UniqueEntityID) {
+  static create(input: ChatInput, id?: string) {
     const chat = new Chat(
-      { ...props, createdAt: props.createdAt ?? new Date() },
+      { ...input, createdAt: input.createdAt ?? new Date() },
       id,
     );
 

@@ -1,10 +1,14 @@
 import { Optional } from '@/core/types/optional';
 import { Entity } from '@/core/entities/entity';
-import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
-export interface MessageProps {
-  chatId: UniqueEntityID;
-  senderId: UniqueEntityID;
+export type MessageInput = Optional<
+  MessageProps,
+  'createdAt' | 'updatedAt' | 'status'
+>;
+
+interface MessageProps {
+  chatId: string;
+  senderId: string;
   content: string;
   status: 'sent' | 'delivered' | 'read';
   createdAt: Date;
@@ -40,10 +44,7 @@ export class Message extends Entity<MessageProps> {
     return this.props.updatedAt;
   }
 
-  static create(
-    props: Optional<MessageProps, 'createdAt' | 'updatedAt' | 'status'>,
-    id?: UniqueEntityID,
-  ) {
+  static create(props: MessageInput, id?: string) {
     const message = new Message(
       {
         ...props,

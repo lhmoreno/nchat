@@ -168,4 +168,44 @@ export const API = {
 
     return { error: { status: res.status, body } };
   },
+
+  async sendMessage(data: { chatId: string; content: string }) {
+    const res = await fetch(`${apiUrl}/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    const body = await res.json();
+
+    if (res.status === 201) {
+      const message = body as Messages[0];
+
+      return { message };
+    }
+
+    return { error: { status: res.status, body } };
+  },
+
+  async changeMessageStatus(messageId: string, status: "delivered" | "read") {
+    const res = await fetch(`${apiUrl}/messages/${messageId}/status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    if (res.status === 204) {
+      return { success: true };
+    }
+
+    const body = await res.json();
+
+    return { error: { status: res.status, body } };
+  },
 };

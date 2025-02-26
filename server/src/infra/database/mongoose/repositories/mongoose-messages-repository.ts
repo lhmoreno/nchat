@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { MessagesRepository } from '@/domain/repositories/messages-repository';
-import { Message } from '@/domain/entities/message';
+import { Message, MessageInput } from '@/domain/entities/message';
 import { MongooseMessageMapper } from '../mappers/mongoose-message-mapper';
 import { Model } from 'mongoose';
 import { MessageDoc } from '../schemas/message.schema';
@@ -32,15 +32,12 @@ export class MongooseMessagesRepository implements MessagesRepository {
     return MongooseMessageMapper.toDomain(message);
   }
 
-  async create(message: Message): Promise<void> {
-    await this.messageModel.create({
-      chatId: message.chatId,
-      senderId: message.senderId,
-      content: message.content,
-      status: message.status,
-      updatedAt: message.updatedAt,
-      createdAt: message.createdAt,
-    });
+  async create(input: MessageInput): Promise<Message> {
+    const doc = await this.messageModel.create(input);
+
+    const message = Message.create(input, doc._id.toString());
+
+    return message;
   }
 
   async save(message: Message): Promise<void> {

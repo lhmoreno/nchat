@@ -111,6 +111,6 @@ body {
     height: calc(100vh - 6rem);
   }
   .h-conversation {
-    height: calc(100vh - 7rem);
+    height: calc(100vh - 14.625rem);
   }
 }

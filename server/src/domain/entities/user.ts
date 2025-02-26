@@ -1,8 +1,9 @@
 import { Optional } from '@/core/types/optional';
 import { Entity } from '@/core/entities/entity';
-import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 
-export interface UserProps {
+export type UserInput = Optional<UserProps, 'createdAt' | 'updatedAt'>;
+
+interface UserProps {
   name: string;
   username: string;
   email: string;
@@ -44,15 +45,12 @@ export class User extends Entity<UserProps> {
     return this.props.updatedAt;
   }
 
-  static create(
-    props: Optional<UserProps, 'createdAt' | 'updatedAt'>,
-    id?: UniqueEntityID,
-  ) {
+  static create(input: UserInput, id?: string) {
     const user = new User(
       {
-        ...props,
-        createdAt: props.createdAt ?? new Date(),
-        updatedAt: props.updatedAt ?? new Date(),
+        ...input,
+        createdAt: input.createdAt ?? new Date(),
+        updatedAt: input.updatedAt ?? new Date(),
       },
       id,
     );

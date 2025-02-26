@@ -1,6 +1,5 @@
-import { Chat, ChatProps } from '@/domain/entities/chat';
+import { Chat, ChatInput } from '@/domain/entities/chat';
 import { ChatDoc } from '../schemas/chat.schema';
-import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { UserDoc } from '../schemas/user.schema';
 import { ChatWithUser } from '@/domain/repositories/chats-repository';
 import { MongooseUserMapper } from './mongoose-user-mapper';
@@ -9,13 +8,10 @@ export class MongooseChatMapper {
   static toDomain(raw: ChatDoc): Chat {
     return Chat.create(
       {
-        userIds: [
-          new UniqueEntityID(raw.userIds[0].toString()),
-          new UniqueEntityID(raw.userIds[1].toString()),
-        ],
+        userIds: [raw.userIds[0].toString(), raw.userIds[1].toString()],
         createdAt: raw.createdAt,
       },
-      new UniqueEntityID(raw._id.toString()),
+      raw._id.toString(),
     );
   }
 
@@ -24,10 +20,6 @@ export class MongooseChatMapper {
   ): ChatWithUser {
     return {
       id: raw._id.toString(),
-      userIds: [
-        new UniqueEntityID(raw.userIds[0]._id.toString()),
-        new UniqueEntityID(raw.userIds[1]._id.toString()),
-      ],
       createdAt: raw.createdAt,
       users: [
         MongooseUserMapper.toDomain(raw.userIds[0]),
@@ -36,7 +28,7 @@ export class MongooseChatMapper {
     };
   }
 
-  static toMongoose(chat: Chat): ChatProps {
+  static toMongoose(chat: Chat): ChatInput {
     return {
       userIds: chat.userIds,
       createdAt: chat.createdAt,
