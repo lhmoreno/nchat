@@ -1,6 +1,7 @@
 import { GetUserUseCase } from '@/domain/use-cases/get-user';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
+import { User } from '@nchat/dtos/user';
 import {
   Controller,
   Get,
@@ -16,7 +17,7 @@ export class GetUserController {
 
   @Get()
   @HttpCode(200)
-  async handle(@CurrentUser() user: UserPayload) {
+  async handle(@CurrentUser() user: UserPayload): Promise<User> {
     const userId = user.sub;
 
     const result = await this.getUser.execute({

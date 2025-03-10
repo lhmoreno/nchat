@@ -8,7 +8,6 @@ import {
   NotFoundException,
   Post,
 } from '@nestjs/common';
-import { z } from 'zod';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { createZodDto } from 'nestjs-zod';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
@@ -16,14 +15,11 @@ import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { ChatAlreadyExistsError } from '@/domain/use-cases/errors/chat-already-exists-error';
 import { UserNotExists } from '@/domain/use-cases/errors/user-not-exists';
+import { CreateChatResponse, createChatSchema } from '@nchat/dtos/chat';
 
-const createChatBodySchema = z.object({
-  receiveId: z.string(),
-});
+const bodyValidationPipe = new ZodValidationPipe(createChatSchema);
 
-const bodyValidationPipe = new ZodValidationPipe(createChatBodySchema);
-
-class CreateChatBodySchema extends createZodDto(createChatBodySchema) {}
+class CreateChatBodySchema extends createZodDto(createChatSchema) {}
 
 @ApiBearerAuth()
 @Controller('/chats')
@@ -35,7 +31,7 @@ export class CreateChatController {
   async handle(
     @Body(bodyValidationPipe) body: CreateChatBodySchema,
     @CurrentUser() user: UserPayload,
-  ) {
+  ): Promise<CreateChatResponse> {
     const userId = user.sub;
 
     const result = await this.createChat.execute({

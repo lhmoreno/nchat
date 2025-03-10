@@ -1,6 +1,7 @@
 import { ListUsersUseCase } from '@/domain/use-cases/list-users';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
+import { User } from '@nchat/dtos/user';
 import {
   Controller,
   Get,
@@ -16,7 +17,7 @@ export class ListUsersController {
 
   @Get()
   @HttpCode(200)
-  async handle(@CurrentUser() user: UserPayload) {
+  async handle(@CurrentUser() user: UserPayload): Promise<User[]> {
     const userId = user.sub;
 
     const result = await this.listUsers.execute({
@@ -31,6 +32,8 @@ export class ListUsersController {
       id: user.id.toString(),
       name: user.name,
       username: user.username,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
     }));
   }
 }

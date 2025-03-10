@@ -7,20 +7,18 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe';
-import { z } from 'zod';
 import { AuthenticateUseCase } from '@/domain/use-cases/authenticate';
 import { WrongCredentialsError } from '@/domain/use-cases/errors/wrong-credentials-error';
 import { Public } from '@/infra/auth/public';
 import { createZodDto } from 'nestjs-zod';
+import {
+  AuthenticateUserResponse,
+  authenticateUserSchema,
+} from '@nchat/dtos/user';
 
-const authenticateBodySchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
+const bodyValidationPipe = new ZodValidationPipe(authenticateUserSchema);
 
-const bodyValidationPipe = new ZodValidationPipe(authenticateBodySchema);
-
-class AuthenticateBodySchema extends createZodDto(authenticateBodySchema) {}
+class AuthenticateBodySchema extends createZodDto(authenticateUserSchema) {}
 
 @Controller('/sessions')
 @Public()
@@ -29,7 +27,9 @@ export class AuthenticateController {
 
   @Post()
   @HttpCode(201)
-  async handle(@Body(bodyValidationPipe) body: AuthenticateBodySchema) {
+  async handle(
+    @Body(bodyValidationPipe) body: AuthenticateBodySchema,
+  ): Promise<AuthenticateUserResponse> {
     const { email, password } = body;
 
     const result = await this.authenticate.execute({

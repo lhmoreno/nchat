@@ -19,7 +19,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "test/*": ["test/*"]
+      "test/*": ["test/*"],
+      "@nchat/dtos/*": ["../../packages/dtos/dist/*"]
     }
   }
 }

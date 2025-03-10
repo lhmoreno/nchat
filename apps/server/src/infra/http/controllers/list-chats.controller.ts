@@ -1,6 +1,7 @@
 import { ListChatsUseCase } from '@/domain/use-cases/list-chats';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
+import { Chat } from '@nchat/dtos/chat';
 import {
   Controller,
   Get,
@@ -16,7 +17,7 @@ export class ListChatsController {
 
   @Get()
   @HttpCode(200)
-  async handle(@CurrentUser() chat: UserPayload) {
+  async handle(@CurrentUser() chat: UserPayload): Promise<Chat[]> {
     const userId = chat.sub;
 
     const result = await this.listChats.execute({

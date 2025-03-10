@@ -17,8 +17,10 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { API, Profile } from "~/lib/api";
 import { toast } from "sonner";
+import { User } from "@nchat/dtos/user";
+import { useMutation } from "@tanstack/react-query";
+import { updateProfile } from "~/lib/api/update-profile";
 
 const updateProfileFormSchema = z.object({
   name: z
@@ -29,13 +31,25 @@ const updateProfileFormSchema = z.object({
 
 type UpdateProfileFormData = z.infer<typeof updateProfileFormSchema>;
 
-export default function UpdateProfileForm({ profile }: { profile: Profile }) {
+export default function UpdateProfileForm({ profile }: { profile: User }) {
   const [changeDefaultNameCount, setChangeDefaultNameCount] = useState(0);
 
   const form = useForm<UpdateProfileFormData>({
     resolver: zodResolver(updateProfileFormSchema),
     defaultValues: {
       name: profile.name,
+    },
+  });
+
+  const { mutateAsync: updateUser } = useMutation({
+    mutationFn: updateProfile,
+    onSuccess: (_, data) => {
+      toast("Nome alterado com sucesso!", {
+        description: `Novo nome: ${data.name}`,
+      });
+    },
+    onError: (error) => {
+      console.error(error);
     },
   });
 
@@ -51,16 +65,7 @@ export default function UpdateProfileForm({ profile }: { profile: Profile }) {
   async function handleSubmitName(data: UpdateProfileFormData) {
     if (profile.name === data.name) return;
 
-    const res = await API.updateProfile({ name: data.name });
-
-    if (res.error) {
-      console.error(res.error);
-      return;
-    }
-
-    toast("Nome alterado com sucesso!", {
-      description: `Novo nome: ${data.name}`,
-    });
+    await updateUser({ name: data.name });
   }
 
   return (

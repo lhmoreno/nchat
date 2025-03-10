@@ -1,6 +1,7 @@
 import { ListMessagesUseCase } from '@/domain/use-cases/list-messages';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
+import { Message } from '@nchat/dtos/message';
 import {
   Controller,
   Get,
@@ -20,7 +21,7 @@ export class ListMessagesController {
   async handle(
     @CurrentUser() message: UserPayload,
     @Param('chatId') chatId: string,
-  ) {
+  ): Promise<Message[]> {
     const userId = message.sub;
 
     const result = await this.listMessages.execute({
@@ -37,7 +38,7 @@ export class ListMessagesController {
       senderId: message.senderId.toString(),
       content: message.content,
       status: message.status,
-      createdAt: message.createdAt,
+      createdAt: message.createdAt.toISOString(),
     }));
   }
 }

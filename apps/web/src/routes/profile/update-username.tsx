@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -18,8 +18,11 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { API, Profile } from "~/lib/api";
 import { toast } from "sonner";
+import { User } from "@nchat/dtos/user";
+import { updateUsername } from "~/lib/api/update-username";
+import { useMutation } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 
 const updateUsernameFormSchema = z.object({
   username: z
@@ -30,7 +33,7 @@ const updateUsernameFormSchema = z.object({
 
 type UpdateUsernameFormData = z.infer<typeof updateUsernameFormSchema>;
 
-export default function UpdateUsernameForm({ profile }: { profile: Profile }) {
+export default function UpdateUsernameForm({ profile }: { profile: User }) {
   const [currentUsername, setCurrentUsername] = useState(profile.username);
 
   const form = useForm<UpdateUsernameFormData>({
@@ -40,26 +43,29 @@ export default function UpdateUsernameForm({ profile }: { profile: Profile }) {
     },
   });
 
-  async function handleSubmit(data: UpdateUsernameFormData) {
-    if (currentUsername === data.username) return;
+  const { mutateAsync: update } = useMutation({
+    mutationFn: updateUsername,
+    onSuccess: (_, data) => {
+      setCurrentUsername(data.username);
 
-    const res = await API.updateUsername(data.username);
-
-    if (res.error) {
-      if (res.error.status === 409) {
+      toast("Username alterado com sucesso!", {
+        description: "@" + data.username,
+      });
+    },
+    onError: (error) => {
+      if (isAxiosError(error) && error.status === 409) {
         form.setError("username", { message: "Username já está em uso" });
         return;
       }
 
-      console.error(res.error);
-      return;
-    }
+      console.error(error);
+    },
+  });
 
-    setCurrentUsername(data.username);
+  async function handleSubmit(data: UpdateUsernameFormData) {
+    if (currentUsername === data.username) return;
 
-    toast("Username alterado com sucesso!", {
-      description: "@" + data.username,
-    });
+    await update(data);
   }
 
   return (

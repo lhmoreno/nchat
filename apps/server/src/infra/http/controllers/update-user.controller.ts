@@ -7,7 +7,6 @@ import {
   Put,
   UnauthorizedException,
 } from '@nestjs/common';
-import { z } from 'zod';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { createZodDto } from 'nestjs-zod';
 import { UpdateUserUseCase } from '@/domain/use-cases/update-user';
@@ -16,14 +15,11 @@ import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserNotExists } from '@/domain/use-cases/errors/user-not-exists';
 import { NotAllowedError } from '@/core/errors/not-allowed-error';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { updateUserSchema } from '@nchat/dtos/user';
 
-const updateUserBodySchema = z.object({
-  name: z.string(),
-});
+const bodyValidationPipe = new ZodValidationPipe(updateUserSchema);
 
-const bodyValidationPipe = new ZodValidationPipe(updateUserBodySchema);
-
-class UpdateUserBodySchema extends createZodDto(updateUserBodySchema) {}
+class UpdateUserBodySchema extends createZodDto(updateUserSchema) {}
 
 @ApiBearerAuth()
 @Controller('/users')

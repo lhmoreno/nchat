@@ -1,5 +1,4 @@
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import {
@@ -13,55 +12,45 @@ import {
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Link, useNavigate } from "react-router";
-import { API } from "~/lib/api";
 import { useState } from "react";
-import { Route } from "./+types/login";
+import {
+  authenticateUserSchema,
+  AuthenticateUserSchema,
+} from "@nchat/dtos/user";
+import { useMutation } from "@tanstack/react-query";
+import { signIn } from "~/lib/api/sign-in";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [{ title: "Login | nChat" }];
 }
-
-const loginFormSchema = z.object({
-  email: z
-    .string({ required_error: "Campo obrigatório" })
-    .email("O e-mail é inválido"),
-  password: z.string({ required_error: "Campo obrigatório" }),
-});
-
-type LoginFormData = z.infer<typeof loginFormSchema>;
 
 export default function Login() {
   const [isInvalidError, setIsInvalidError] = useState(false);
 
   const navigate = useNavigate();
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<AuthenticateUserSchema>({
+    resolver: zodResolver(authenticateUserSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  async function handleSubmitLogin(data: LoginFormData) {
-    if (data.password.length < 6) {
+  const { mutateAsync: authenticate } = useMutation({
+    mutationFn: signIn,
+  });
+
+  async function handleAuthenticate(data: AuthenticateUserSchema) {
+    try {
+      const { access_token } = await authenticate(data);
+
+      localStorage.setItem("token", access_token);
+
+      navigate("/chats");
+    } catch (err) {
       setIsInvalidError(true);
-      return;
     }
-
-    const res = await API.login(data);
-
-    if (res.error) {
-      if (res.error.status === 401) {
-        setIsInvalidError(true);
-        return;
-      }
-
-      console.error(res.error);
-      return;
-    }
-
-    navigate("/");
   }
 
   return (
@@ -77,7 +66,7 @@ export default function Login() {
       <CardContent className="p-4">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmitLogin)}
+            onSubmit={form.handleSubmit(handleAuthenticate)}
             className="space-y-4"
           >
             <FormField

@@ -8,7 +8,6 @@ import {
   NotFoundException,
   Post,
 } from '@nestjs/common';
-import { z } from 'zod';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { createZodDto } from 'nestjs-zod';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
@@ -17,15 +16,14 @@ import { NotAllowedError } from '@/core/errors/not-allowed-error';
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found-error';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { EventsGateway } from '@/infra/socket/events/events.gateway';
+import {
+  CreateMessageResponse,
+  createMessageSchema,
+} from '@nchat/dtos/message';
 
-const createMessageBodySchema = z.object({
-  chatId: z.string(),
-  content: z.string(),
-});
+const bodyValidationPipe = new ZodValidationPipe(createMessageSchema);
 
-const bodyValidationPipe = new ZodValidationPipe(createMessageBodySchema);
-
-class CreateMessageBodySchema extends createZodDto(createMessageBodySchema) {}
+class CreateMessageBodySchema extends createZodDto(createMessageSchema) {}
 
 @ApiBearerAuth()
 @Controller('/messages')
@@ -40,7 +38,7 @@ export class CreateMessageController {
   async handle(
     @Body(bodyValidationPipe) body: CreateMessageBodySchema,
     @CurrentUser() user: UserPayload,
-  ) {
+  ): Promise<CreateMessageResponse> {
     const userId = user.sub;
 
     const result = await this.createMessage.execute({
@@ -66,18 +64,17 @@ export class CreateMessageController {
       {
         id: result.value.message.id.toString(),
         content: result.value.message.content,
-        createdAt: result.value.message.createdAt,
-        chatId: result.value.message.chatId.toString(),
+        createdAt: result.value.message.createdAt.toISOString(),
+        status: result.value.message.status,
         senderId: userId,
       },
       result.value.receiveId,
+      result.value.message.chatId,
     );
 
     return {
       id: result.value.message.id.toString(),
-      content: result.value.message.content,
-      createdAt: result.value.message.createdAt,
-      chatId: result.value.message.chatId.toString(),
+      createdAt: result.value.message.createdAt.toISOString(),
       status: result.value.message.status,
     };
   }

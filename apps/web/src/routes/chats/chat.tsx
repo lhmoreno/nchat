@@ -1,4 +1,3 @@
-import { API, Chats, Messages } from "~/lib/api";
 import { cn } from "~/lib/utils";
 import { Route } from "./+types/chat";
 import {
@@ -11,11 +10,19 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import dayjs from "dayjs";
-import { fakerPT_BR as faker } from "@faker-js/faker";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { io, Socket } from "socket.io-client";
+import { queryClient } from "~/lib/react-query";
+import { Chat } from "@nchat/dtos/chat";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getMessages } from "~/lib/api/get-messages";
+import { changeMessageStatus } from "~/lib/api/change-message-status";
+import { sendMessage } from "~/lib/api/send-message";
+import { v4 as uuid } from "uuid";
+import { Message } from "@nchat/dtos/message";
+import { User } from "@nchat/dtos/user";
 
 export function meta({ params }: Route.MetaArgs) {
   if (params.chatId) {
@@ -25,51 +32,9 @@ export function meta({ params }: Route.MetaArgs) {
   return [{ title: "Conversas | nChat" }];
 }
 
-export async function clientLoader({ params }: Route.ClientLoaderArgs) {
-  const { chatId } = params;
-
-  if (!chatId) {
-    return null;
-  }
-
-  const res = await API.getMessages(chatId);
-
-  if (res.error) {
-    console.error(res.error);
-    return [];
-  }
-
-  return res.body;
-}
-
-function generateMessages(
-  count: number,
-  senderId: string | undefined = "123"
-): Messages {
-  return Array.from({ length: count }, (): Messages[0] => {
-    return {
-      id: faker.string.uuid(),
-      senderId: faker.datatype.boolean() ? faker.string.uuid() : senderId,
-      content: faker.lorem.sentence(),
-      createdAt: faker.date.recent().toISOString(),
-      status: faker.helpers.arrayElement([
-        // undefined,
-        // "pending",
-        "sent",
-        "delivered",
-        "read",
-      ]),
-    };
-  });
-}
-
 let socket: Socket;
 
-export default function Chat({
-  matches,
-  params,
-  loaderData,
-}: Route.ComponentProps) {
+export default function Chat({ matches, params }: Route.ComponentProps) {
   if (!params.chatId) {
     return (
       <div className="flex-1">
@@ -80,15 +45,76 @@ export default function Chat({
     );
   }
 
-  const chat = matches[2].data.find(
-    ({ id }) => id === params.chatId
-  ) as Chats[0];
-  const profile = matches[1].data;
+  const chats = queryClient.getQueryData(["chats"]) as Chat[];
+  const chat = chats.find(({ id }) => id === params.chatId) as Chat;
+  const profile = queryClient.getQueryData(["profile"]) as User;
 
   const [isSocketConnected, setSocketIsConnected] = useState(false);
-  const [messages, setMessages] = useState(loaderData ?? []);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const inputMessageRef = useRef<HTMLInputElement>(null);
+
+  const { data: messages, dataUpdatedAt } = useQuery({
+    queryKey: ["messages", params.chatId],
+    queryFn: () => (params.chatId ? getMessages(params.chatId) : []),
+    initialData: [],
+  });
+
+  const { mutateAsync: createMessage } = useMutation({
+    mutationFn: sendMessage,
+    onMutate: async ({ content }) => {
+      const fakeId = "pending-" + uuid();
+      const cached = queryClient.getQueryData<Message[]>([
+        "messages",
+        params.chatId,
+      ]);
+
+      if (cached) {
+        queryClient.setQueryData<Message[]>(
+          ["messages", params.chatId],
+          [
+            ...cached,
+            {
+              id: fakeId,
+              content,
+              createdAt: new Date().toISOString(),
+              senderId: profile.id,
+              status: "sent",
+            },
+          ]
+        );
+      }
+
+      return { fakeId, cached };
+    },
+    onSuccess: ({ id, createdAt, status }, _, { fakeId }) => {
+      queryClient.setQueryData<Message[]>(
+        ["messages", params.chatId],
+        (cached) => {
+          if (cached) {
+            const list = cached;
+            const index = list.findIndex(({ id }) => id === fakeId);
+
+            list[index] = {
+              ...list[index],
+              id,
+              createdAt,
+              status,
+            };
+
+            return list;
+          }
+        }
+      );
+    },
+    onError: (_, __, ctx) => {
+      if (ctx?.cached) {
+        queryClient.setQueryData<Message[]>(
+          ["messages", params.chatId],
+          ctx.cached
+        );
+      }
+    },
+  });
 
   useEffect(() => {
     socket = io(import.meta.env.VITE_API_URL, {
@@ -104,20 +130,21 @@ export default function Chat({
 
   useEffect(() => {
     if (isSocketConnected) {
-      socket.on("message", (message: Messages[0] & { chatId: string }) => {
-        if (message.chatId !== chat.id) {
-          API.changeMessageStatus(message.id, "delivered");
+      socket.on("message", (chatId: string, message: Message) => {
+        if (chatId !== chat.id) {
+          changeMessageStatus(message.id, { status: "delivered" });
           return;
         }
 
-        API.changeMessageStatus(message.id, "read");
-        setMessages((v) => [
-          ...v,
-          {
-            ...message,
-            status: "read",
-          },
-        ]);
+        changeMessageStatus(message.id, { status: "read" });
+        queryClient.setQueryData<Message[]>(
+          ["messages", params.chatId],
+          (cached) => {
+            if (cached) {
+              return [...cached, message];
+            }
+          }
+        );
       });
 
       socket.on(
@@ -131,17 +158,22 @@ export default function Chat({
             return;
           }
 
-          setMessages((v) => {
-            const list: Messages = [...v];
-            const index = list.findIndex(({ id }) => id === message.id);
+          queryClient.setQueryData<Message[]>(
+            ["messages", params.chatId],
+            (cached) => {
+              if (cached) {
+                const list = cached;
+                const index = list.findIndex(({ id }) => id === message.id);
 
-            list[index] = {
-              ...list[index],
-              status: message.status,
-            };
+                list[index] = {
+                  ...list[index],
+                  status: message.status,
+                };
 
-            return list;
-          });
+                return list;
+              }
+            }
+          );
         }
       );
 
@@ -153,12 +185,8 @@ export default function Chat({
   }, [isSocketConnected, chat]);
 
   useEffect(() => {
-    setMessages(loaderData ?? []);
-  }, [loaderData]);
-
-  useEffect(() => {
     scrollMessagesToBottom();
-  }, [messages]);
+  }, [messages, dataUpdatedAt]);
 
   function scrollMessagesToBottom() {
     if (scrollAreaRef.current) {
@@ -180,50 +208,17 @@ export default function Chat({
     const formData = new FormData(ev.currentTarget);
     const message = String(formData.get("message")).trim();
 
-    if (message === "") {
+    if (message === "" || !params.chatId) {
       return;
     }
-
-    const fakeId = faker.string.uuid();
-
-    setMessages((v) => {
-      const list: Messages = [
-        ...v,
-        {
-          id: fakeId,
-          content: message,
-          createdAt: new Date().toISOString(),
-          senderId: profile.id,
-          status: "pending",
-        },
-      ];
-
-      return list;
-    });
 
     if (inputMessageRef?.current?.value) {
       inputMessageRef.current.value = "";
     }
 
-    const res = await API.sendMessage({ chatId: chat.id, content: message });
-
-    if (res.error) {
-      setMessages((v) => v.filter(({ id }) => id !== fakeId));
-      return;
-    }
-
-    setMessages((v) => {
-      const list: Messages = [...v];
-      const index = list.findIndex(({ id }) => id === fakeId);
-
-      list[index] = {
-        ...list[index],
-        id: res.message.id,
-        createdAt: res.message.createdAt,
-        status: res.message.status,
-      };
-
-      return list;
+    await createMessage({
+      chatId: params.chatId,
+      content: message,
     });
   }
 
@@ -246,7 +241,7 @@ export default function Chat({
             const isSender = message.senderId === profile.id;
 
             const Icon = () => {
-              if (message.status === "pending") {
+              if (message.status === "sent" && message.id.includes("pending")) {
                 return <ClockIcon className="w-3 h-3" />;
               }
               if (message.status === "sent") {

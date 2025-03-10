@@ -1,4 +1,5 @@
 import { JwtStrategy } from '@/infra/auth/jwt.strategy';
+import { Message } from '@nchat/dtos/message';
 import { Injectable } from '@nestjs/common';
 import {
   OnGatewayConnection,
@@ -67,29 +68,14 @@ export class EventsGateway
     return !!this.users[userId];
   }
 
-  emitMessage(
-    message: {
-      id: string;
-      content: string;
-      createdAt: Date;
-      chatId: string;
-      senderId: string;
-    },
-    userId: string,
-  ) {
+  emitMessage(message: Message, userId: string, chatId: string) {
     const clientId = this.users[userId];
 
     if (!clientId) {
       return false;
     }
 
-    const success = this.server.to(clientId).emit('message', {
-      id: message.id,
-      content: message.content,
-      createdAt: message.createdAt.toISOString(),
-      chatId: message.chatId,
-      senderId: message.senderId,
-    });
+    const success = this.server.to(clientId).emit('message', chatId, message);
 
     return success;
   }

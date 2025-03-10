@@ -1,5 +1,12 @@
-import { redirect } from "react-router";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
 
-export async function loader() {
-  return redirect("/chats");
+export default function Home() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate("/chats");
+  }, []);
+
+  return null;
 }

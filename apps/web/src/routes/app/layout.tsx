@@ -1,6 +1,8 @@
-import { Outlet, redirect } from "react-router";
+import { Outlet, redirect, useNavigate } from "react-router";
 import { Header } from "./header";
-import { API, Profile } from "~/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { getProfile } from "~/lib/api/get-profile";
+import { useEffect } from "react";
 
 export async function clientLoader() {
   const token = localStorage.getItem("token");
@@ -8,23 +10,25 @@ export async function clientLoader() {
   if (!token) {
     return redirect("/login");
   }
-
-  const res = await API.getProfile();
-
-  if (!res.profile) {
-    console.error(res.error);
-    localStorage.removeItem("token");
-    return redirect("/login");
-  }
-
-  return res.profile;
 }
 
-export default function AppLayout({
-  loaderData: profile,
-}: {
-  loaderData: Profile;
-}) {
+export default function AppLayout() {
+  const navigate = useNavigate();
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getProfile,
+  });
+
+  useEffect(() => {
+    if (!isLoading && !profile) {
+      navigate("/login");
+    }
+  }, [profile, isLoading]);
+
+  if (isLoading || !profile) {
+    return null;
+  }
+
   return (
     <div>
       <Header profile={profile} />

@@ -7,7 +7,6 @@ import {
   NotFoundException,
   Patch,
 } from '@nestjs/common';
-import { z } from 'zod';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { createZodDto } from 'nestjs-zod';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
@@ -16,14 +15,11 @@ import { UserNotExists } from '@/domain/use-cases/errors/user-not-exists';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateUsernameUseCase } from '@/domain/use-cases/update-username';
 import { UserNameAlreadyExistsError } from '@/domain/use-cases/errors/username-already-exists-error';
+import { updateUsernameSchema } from '@nchat/dtos/user';
 
-const updateUsernameBodySchema = z.object({
-  username: z.string(),
-});
+const bodyValidationPipe = new ZodValidationPipe(updateUsernameSchema);
 
-const bodyValidationPipe = new ZodValidationPipe(updateUsernameBodySchema);
-
-class UpdateUsernameBodySchema extends createZodDto(updateUsernameBodySchema) {}
+class UpdateUsernameBodySchema extends createZodDto(updateUsernameSchema) {}
 
 @ApiBearerAuth()
 @Controller('/users/username')

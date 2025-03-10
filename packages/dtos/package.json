@@ -1,0 +1,22 @@
+{
+  "name": "@nchat/dtos",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsc --watch --preserveWatchOutput",
+    "build": "tsc"
+  },
+  "exports": {
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@nchat/tsconfig": "workspace:*",
+    "typescript": "5.7.3"
+  }
+}

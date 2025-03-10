@@ -8,7 +8,6 @@ import {
   Param,
   Patch,
 } from '@nestjs/common';
-import { z } from 'zod';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { createZodDto } from 'nestjs-zod';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
@@ -18,15 +17,12 @@ import { ResourceNotFoundError } from '@/core/errors/resource-not-found-error';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateMessageStatusUseCase } from '@/domain/use-cases/update-message-status';
 import { EventsGateway } from '@/infra/socket/events/events.gateway';
+import { updateMessageStatusSchema } from '@nchat/dtos/message';
 
-const updateMessageStatusBodySchema = z.object({
-  status: z.enum(['delivered', 'read']),
-});
-
-const bodyValidationPipe = new ZodValidationPipe(updateMessageStatusBodySchema);
+const bodyValidationPipe = new ZodValidationPipe(updateMessageStatusSchema);
 
 class UpdateMessageStatusBodySchema extends createZodDto(
-  updateMessageStatusBodySchema,
+  updateMessageStatusSchema,
 ) {}
 
 @ApiBearerAuth()

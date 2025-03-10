@@ -1,22 +1,21 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet, useLocation } from "react-router";
 import { Separator } from "~/components/ui/separator";
-import { API, Chats } from "~/lib/api";
+import { getChats } from "~/lib/api/get-chats";
 import { cn } from "~/lib/utils";
 
-export async function clientLoader() {
-  const res = await API.getChats();
-
-  if (res.error) {
-    console.error(res.error);
-    return [];
-  }
-
-  return res.body;
-}
-
-export default function Chats({ loaderData: chats }: { loaderData: Chats }) {
+export default function Chats() {
   const location = useLocation();
   const pathname = location.pathname;
+
+  const { data: chats } = useQuery({
+    queryKey: ["chats"],
+    queryFn: getChats,
+  });
+
+  if (!chats) {
+    return null;
+  }
 
   return (
     <div className="mt-4 h-chat flex rounded-lg border bg-card text-card-foreground shadow-sm">

@@ -1,0 +1,10 @@
+{
+  "extends": ["@nchat/tsconfig/base.json"],
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "outDir": "dist"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

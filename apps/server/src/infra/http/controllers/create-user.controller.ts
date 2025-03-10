@@ -7,22 +7,15 @@ import {
   HttpCode,
   Post,
 } from '@nestjs/common';
-import { z } from 'zod';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { createZodDto } from 'nestjs-zod';
 import { Public } from '@/infra/auth/public';
 import { UserAlreadyExistsError } from '@/domain/use-cases/errors/user-already-exists-error';
+import { createUserSchema } from '@nchat/dtos/user';
 
-const createUserBodySchema = z.object({
-  name: z.string(),
-  email: z.string().email(),
-  username: z.string(),
-  password: z.string(),
-});
+const bodyValidationPipe = new ZodValidationPipe(createUserSchema);
 
-const bodyValidationPipe = new ZodValidationPipe(createUserBodySchema);
-
-class CreateUserBodySchema extends createZodDto(createUserBodySchema) {}
+class CreateUserBodySchema extends createZodDto(createUserSchema) {}
 
 @Controller('/users')
 @Public()

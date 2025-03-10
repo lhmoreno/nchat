@@ -1,5 +1,4 @@
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import {
@@ -14,72 +13,66 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Link, useNavigate } from "react-router";
 import type { Route } from "./+types/register";
-import { API } from "~/lib/api";
+import { CreateUserSchema, createUserSchema } from "@nchat/dtos/user";
+import { useMutation } from "@tanstack/react-query";
+import { register } from "~/lib/api/register";
+import { isAxiosError } from "axios";
+import { signIn } from "~/lib/api/sign-in";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Registrar | nChat" }];
 }
 
-const registerFormSchema = z.object({
-  name: z.string({ required_error: "Campo obrigatório" }),
-  username: z.string({ required_error: "Campo obrigatório" }),
-  email: z
-    .string({ required_error: "Campo obrigatório" })
-    .email("O e-mail é inválido"),
-  password: z.string({ required_error: "Campo obrigatório" }),
-});
-
-type RegisterFormData = z.infer<typeof registerFormSchema>;
-
 export default function Register() {
   const navigate = useNavigate();
 
-  const form = useForm<RegisterFormData>({
-    resolver: zodResolver(registerFormSchema),
+  const form = useForm<CreateUserSchema>({
+    resolver: zodResolver(createUserSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  async function handleSubmitRegister(data: RegisterFormData) {
-    const res = await API.register(data);
+  const { mutateAsync: createUser } = useMutation({
+    mutationFn: register,
+    onError: (error, data) => {
+      if (isAxiosError(error)) {
+        if (
+          error.status === 409 &&
+          error.response?.data.message.includes(data.email)
+        ) {
+          form.setError("email", {
+            type: "manual",
+            message: "E-mail já registrado",
+          });
+          return;
+        }
 
-    if (res.error) {
-      if (
-        res.error.status === 409 &&
-        res.error.body.message.includes(data.email)
-      ) {
-        form.setError("email", {
-          type: "manual",
-          message: "E-mail já registrado",
-        });
-        return;
+        if (
+          error.status === 409 &&
+          error.response?.data.message.includes(data.username)
+        ) {
+          form.setError("username", {
+            type: "manual",
+            message: "Username já registrado",
+          });
+          return;
+        }
+
+        console.error(error);
       }
+    },
+  });
 
-      if (
-        res.error.status === 409 &&
-        res.error.body.message.includes(data.username)
-      ) {
-        form.setError("username", {
-          type: "manual",
-          message: "Username já registrado",
-        });
-        return;
-      }
+  async function handleSubmitRegister(data: CreateUserSchema) {
+    await createUser(data);
 
-      console.error(res.error);
-      return;
-    }
+    const { access_token } = await signIn(data);
 
-    const login = await API.login({
-      email: data.email,
-      password: data.password,
-    });
+    localStorage.setItem("token", access_token);
 
-    if (login.access_token) {
-      navigate("/");
-    }
+    navigate("/chats");
   }
 
   return (

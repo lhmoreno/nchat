@@ -1,3 +1,4 @@
+import { User } from "@nchat/dtos/user";
 import { LogOutIcon, UserRoundIcon } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -11,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Profile } from "~/lib/api";
 import { cn, logOut } from "~/lib/utils";
 
 const links = [
@@ -19,7 +19,7 @@ const links = [
   { href: "/profile", title: "Perfil" },
 ];
 
-export function Header({ profile }: { profile: Profile }) {
+export function Header({ profile }: { profile: User }) {
   const { pathname } = useLocation();
 
   return (

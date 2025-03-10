@@ -11,6 +11,8 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { ThemeProvider } from "./providers/theme-provider";
 import { Toaster } from "./components/ui/sonner";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/react-query";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -45,10 +47,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <Outlet />
-      <Toaster />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <Outlet />
+        <Toaster />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
