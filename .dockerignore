@@ -1,0 +1,13 @@
+**/node_modules/
+.git
+.gitignore
+*.md
+dist
+.react-router
+Dockerfile
+.dockerignore
+.env
+.turbo
+.react-router
+.vscode
+.npmrc

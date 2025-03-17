@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
+    "build": "turbo run build",
     "watch": "turbo run watch"
   },
   "devDependencies": {

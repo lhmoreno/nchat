@@ -1,4 +1,5 @@
 {
+  "version": "1.0.0",
   "name": "web",
   "private": true,
   "type": "module",
@@ -6,6 +7,7 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
+    "start:spa": "sirv ./dist/client/ --single --host",
     "typecheck": "react-router typegen && tsc",
     "check-types": "tsc --noEmit"
   },
@@ -32,6 +34,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "react-router": "^7.2.0",
+    "sirv-cli": "^3.0.1",
     "socket.io-client": "^4.8.1",
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.1",
